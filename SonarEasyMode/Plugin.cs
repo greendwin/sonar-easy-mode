@@ -22,7 +22,7 @@ public class Plugin : BasePlugin
         Settings.Bind(Config);
         Patches.Apply(Plugin.Guid);
         AddComponent<EasyModeDriver>();
-        Log.LogInfo($"{Name} {Version} loaded. Preset={Settings.ActivePreset.Value}, OnlyWhenSolo={Settings.OnlyWhenSolo.Value}");
+        Log.LogInfo($"{Name} {Version} loaded. Enabled={Settings.Enabled.Value}, OnlyWhenSolo={Settings.OnlyWhenSolo.Value}");
     }
 }
 
@@ -70,7 +70,6 @@ public class EasyModeDriver : MonoBehaviour
 
         int players = CountPlayers(engine);
         bool active = Settings.Enabled.Value
-                      && Settings.ActivePreset.Value != Preset.Off
                       && (!Settings.OnlyWhenSolo.Value || players <= 1);
         Active = active;
 
@@ -80,7 +79,7 @@ public class EasyModeDriver : MonoBehaviour
         int changed = Tweaks.Apply(engine, active);
         if (assetChanged || active != _lastActive || players != _lastPlayers || changed > 0)
             Plugin.Log.LogInfo($"{(active ? "Easy mode ACTIVE" : "Vanilla values")} " +
-                               $"(preset {Settings.ActivePreset.Value}, players {players}, {changed} fields changed)");
+                               $"(players {players}, {changed} fields changed)");
 
         _lastLevelingPtr = leveling.Pointer;
         _lastActive = active;

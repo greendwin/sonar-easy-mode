@@ -4,29 +4,19 @@ using BepInEx.Configuration;
 
 namespace SonarEasyMode;
 
-public enum Preset
-{
-    Off,
-    Easy,
-    VeryEasy,
-    Custom,
-}
-
-/// <summary>One tunable group: a multiplier (or absolute override) with per-preset values.</summary>
+/// <summary>One tunable group: a multiplier (or absolute override) with its vanilla and default values.</summary>
 public sealed class Knob
 {
     public readonly string Key;
-    public readonly float Easy;
-    public readonly float VeryEasy;
-    public readonly float Neutral;
-    public ConfigEntry<float> Custom;
+    public readonly float Vanilla;
+    public readonly float Default;
+    public ConfigEntry<float> Entry;
 
-    public Knob(string key, float neutral, float easy, float veryEasy)
+    public Knob(string key, float vanilla, float @default)
     {
         Key = key;
-        Neutral = neutral;
-        Easy = easy;
-        VeryEasy = veryEasy;
+        Vanilla = vanilla;
+        Default = @default;
     }
 }
 
@@ -34,37 +24,36 @@ public static class Settings
 {
     public static ConfigEntry<bool> Enabled;
     public static ConfigEntry<bool> OnlyWhenSolo;
-    public static ConfigEntry<Preset> ActivePreset;
     public static ConfigEntry<bool> VerboseLog;
     public static ConfigEntry<bool> LinkFans;
 
-    // Multipliers: 1 = vanilla. "Duration" knobs: higher = lasts longer. "Chance/speed" knobs: as named.
-    public static readonly Knob HungerDuration = new("HungerDuration", 1f, 2f, 3f);
-    public static readonly Knob StaminaDuration = new("StaminaDuration", 1f, 2f, 3f);
-    public static readonly Knob WorkStaminaDrain = new("WorkStaminaDrain", 1f, 0.6f, 0.4f);
-    public static readonly Knob StaminaRecovery = new("StaminaRecovery", 1f, 1.5f, 2f);
-    public static readonly Knob FuelDuration = new("FuelDuration", 1f, 2f, 3f);
-    public static readonly Knob Co2FilterDuration = new("Co2FilterDuration", 1f, 2f, 3f);
-    public static readonly Knob SnorkelDuration = new("SnorkelDuration", 1f, 2f, 3f);
-    public static readonly Knob RefuelSpeed = new("RefuelSpeed", 1f, 1.5f, 2f);
-    public static readonly Knob FaultRisk = new("FaultRisk", 1f, 0.5f, 0.25f);
-    public static readonly Knob HitFaultChance = new("HitFaultChance", 1f, 0.6f, 0.35f);
-    public static readonly Knob MaxFaultsPerType = new("MaxFaultsPerType", -1f, -1f, 1f);
-    public static readonly Knob FailuresToExplode = new("FailuresToExplode", -1f, 25f, 35f);
-    public static readonly Knob PlayerDamage = new("PlayerDamage", 1f, 0.6f, 0.4f);
-    public static readonly Knob FireSpread = new("FireSpread", 1f, 0.6f, 0.4f);
-    public static readonly Knob FloodSpeed = new("FloodSpeed", 1f, 0.6f, 0.4f);
-    public static readonly Knob PumpSpeed = new("PumpSpeed", 1f, 1.5f, 2f);
-    public static readonly Knob RepairSpeed = new("RepairSpeed", 1f, 1.5f, 2f);
-    public static readonly Knob MoveSpeed = new("MoveSpeed", 1f, 1f, 1.15f);
-    public static readonly Knob NoiseRadius = new("NoiseRadius", 1f, 0.75f, 0.5f);
-    public static readonly Knob DepthNoise = new("DepthNoise", 1f, 1f, 1f);
-    public static readonly Knob DamageToEnemies = new("DamageToEnemies", 1f, 1.6f, 2f);
-    public static readonly Knob EnemyTorpedoSpeed = new("EnemyTorpedoSpeed", 1f, 0.8f, 0.65f);
-    public static readonly Knob EnemyTorpedoTurnRate = new("EnemyTorpedoTurnRate", 1f, 0.7f, 0.5f);
-    public static readonly Knob OpenWorldFuelUse = new("OpenWorldFuelUse", 1f, 0.6f, 0.4f);
-    public static readonly Knob OpenWorldFilterUse = new("OpenWorldFilterUse", 1f, 0.6f, 0.4f);
-    public static readonly Knob OpenWorldFoodUse = new("OpenWorldFoodUse", 1f, 0.6f, 0.4f);
+    // Defaults are the tuned solo values; 1 (or -1 for absolute knobs) = vanilla. "Duration" knobs: higher = lasts longer. "Chance/speed" knobs: as named.
+    public static readonly Knob HungerDuration = new("HungerDuration", 1f, 3f);
+    public static readonly Knob StaminaDuration = new("StaminaDuration", 1f, 2.5f);
+    public static readonly Knob WorkStaminaDrain = new("WorkStaminaDrain", 1f, 0.6f);
+    public static readonly Knob StaminaRecovery = new("StaminaRecovery", 1f, 1.5f);
+    public static readonly Knob FuelDuration = new("FuelDuration", 1f, 2.5f);
+    public static readonly Knob Co2FilterDuration = new("Co2FilterDuration", 1f, 2f);
+    public static readonly Knob SnorkelDuration = new("SnorkelDuration", 1f, 1f);
+    public static readonly Knob RefuelSpeed = new("RefuelSpeed", 1f, 1f);
+    public static readonly Knob FaultRisk = new("FaultRisk", 1f, 0.1f);
+    public static readonly Knob HitFaultChance = new("HitFaultChance", 1f, 0.5f);
+    public static readonly Knob MaxFaultsPerType = new("MaxFaultsPerType", -1f, 2f);
+    public static readonly Knob FailuresToExplode = new("FailuresToExplode", -1f, 25f);
+    public static readonly Knob PlayerDamage = new("PlayerDamage", 1f, 0.5f);
+    public static readonly Knob FireSpread = new("FireSpread", 1f, 0.5f);
+    public static readonly Knob FloodSpeed = new("FloodSpeed", 1f, 0.6f);
+    public static readonly Knob PumpSpeed = new("PumpSpeed", 1f, 2f);
+    public static readonly Knob RepairSpeed = new("RepairSpeed", 1f, 1f);
+    public static readonly Knob MoveSpeed = new("MoveSpeed", 1f, 1.15f);
+    public static readonly Knob NoiseRadius = new("NoiseRadius", 1f, 1f);
+    public static readonly Knob DepthNoise = new("DepthNoise", 1f, 1f);
+    public static readonly Knob DamageToEnemies = new("DamageToEnemies", 1f, 1f);
+    public static readonly Knob EnemyTorpedoSpeed = new("EnemyTorpedoSpeed", 1f, 1f);
+    public static readonly Knob EnemyTorpedoTurnRate = new("EnemyTorpedoTurnRate", 1f, 0.7f);
+    public static readonly Knob OpenWorldFuelUse = new("OpenWorldFuelUse", 1f, 1f);
+    public static readonly Knob OpenWorldFilterUse = new("OpenWorldFilterUse", 1f, 1f);
+    public static readonly Knob OpenWorldFoodUse = new("OpenWorldFoodUse", 1f, 1f);
 
     /// <summary>Bumped whenever any setting changes so the driver re-applies.</summary>
     public static int Version { get; private set; }
@@ -74,8 +63,6 @@ public static class Settings
         Enabled = cfg.Bind("General", "Enabled", true, "Master switch.");
         OnlyWhenSolo = cfg.Bind("General", "OnlyWhenSolo", true,
             "Apply only while you are the only player in the session (vanilla values are restored when others join).");
-        ActivePreset = cfg.Bind("General", "Preset", Preset.Easy,
-            "Off = vanilla, Easy / VeryEasy = built-in values, Custom = use the [Custom] section below.");
         VerboseLog = cfg.Bind("General", "VerboseLog", false, "Log every field change.");
         LinkFans = cfg.Bind("Features", "LinkFans", true,
             "Toggling any fan switches all other fans to the same state (one switch for silent running). Works while easy mode is active.");
@@ -114,15 +101,9 @@ public static class Settings
 
     private static void BindKnob(ConfigFile cfg, Knob knob, string description)
     {
-        knob.Custom = cfg.Bind("Custom", knob.Key, knob.Easy,
-            FormattableString.Invariant($"{description} Vanilla: {knob.Neutral}. Easy: {knob.Easy}. VeryEasy: {knob.VeryEasy}."));
+        knob.Entry = cfg.Bind("Tweaks", knob.Key, knob.Default,
+            FormattableString.Invariant($"{description} Vanilla: {knob.Vanilla}."));
     }
 
-    public static float Value(Knob knob) => ActivePreset.Value switch
-    {
-        Preset.Easy => knob.Easy,
-        Preset.VeryEasy => knob.VeryEasy,
-        Preset.Custom => knob.Custom.Value,
-        _ => knob.Neutral,
-    };
+    public static float Value(Knob knob) => knob.Entry.Value;
 }

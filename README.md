@@ -121,8 +121,8 @@ If you already have `SonarEasyMode.dll`:
 3. Launch the game. `BepInEx\LogOutput.log` should show:
    ```
    [Info   :   BepInEx] Loading [SONAR Easy Mode 0.1.0]
-   [Info   :SONAR Easy Mode] SONAR Easy Mode 0.1.0 loaded. Preset=Easy, OnlyWhenSolo=True
-   [Info   :SONAR Easy Mode] Easy mode ACTIVE (preset Easy, players 1, 35 fields changed)
+   [Info   :SONAR Easy Mode] SONAR Easy Mode 0.1.0 loaded. Enabled=True, OnlyWhenSolo=True
+   [Info   :SONAR Easy Mode] Easy mode ACTIVE (players 1, <N> fields changed)
    ```
 
 To share the mod, zip it with the folder structure intact (`BepInEx\plugins\SonarEasyMode\SonarEasyMode.dll`). Players then extract the zip into a game folder that already has BepInEx.
@@ -136,41 +136,40 @@ After the first launch with the plugin, the config file `<GameDir>\BepInEx\confi
 |---|---|---|
 | `Enabled` | `true` | Master switch |
 | `OnlyWhenSolo` | `true` | Apply only while you're the only player; vanilla values come back when others join |
-| `Preset` | `Easy` | `Off`, `Easy`, `VeryEasy`, or `Custom` (uses the `[Custom]` section) |
 | `VerboseLog` | `false` | Log every field change (old → new, plus the vanilla value) |
 
-`[Custom]` knobs (used only when `Preset = Custom`). Multipliers use 1 for vanilla; for absolute values, `-1` keeps the vanilla value.
+`[Tweaks]` knobs. There are no presets: each knob has one default (tuned for solo play) and you edit it directly. For multipliers, `1` = vanilla; for absolute values, `-1` keeps the vanilla value. To turn everything off, set `Enabled = false`.
 
-| Knob | Game fields (`Indy.*Config`) | Easy | VeryEasy |
-|---|---|---|---|
-| HungerDuration | hungerDurationSeconds | ×2 | ×3 |
-| StaminaDuration | staminaDurationSeconds | ×2 | ×3 |
-| WorkStaminaDrain | staminaReductionRunningOrHeavyWork | ×0.6 | ×0.4 |
-| StaminaRecovery | addStaminaSleepingSpeed, addStaminaPerCoffe | ×1.5 | ×2 |
-| FuelDuration | engineFuelDurationSeconds | ×2 | ×3 |
-| Co2FilterDuration | co2FilterDurationSeconds | ×2 | ×3 |
-| SnorkelDuration | snorkelTankDuration | ×2 | ×3 |
-| RefuelSpeed | refuelAmount | ×1.5 | ×2 |
-| FaultRisk | riskOf* (leak / fire / fuse) | ×0.5 | ×0.25 |
-| HitFaultChance | damage*Probability, damageEngineStop* | ×0.6 | ×0.35 |
-| MaxFaultsPerType | nFires / nLeaks / nFuseBreaksMaxPerGame | vanilla (2) | 1 |
-| FailuresToExplode | amountToFailuresToExplode | 25 | 35 |
-| PlayerDamage | damageFire / damageExplosion Min/Max | ×0.6 | ×0.4 |
-| FireSpread | propagationProbability | ×0.6 | ×0.4 |
-| FloodSpeed | waterLeakAdd | ×0.6 | ×0.4 |
-| PumpSpeed | waterAspirationRemove | ×1.5 | ×2 |
-| RepairSpeed | hullLeakFixAmount, pipeLeakFixAmount, extinFixAmount | ×1.5 | ×2 |
-| MoveSpeed | walk / run / crouch / tired speeds | ×1 | ×1.15 |
-| NoiseRadius | result of `Engine.GetNoiseRadius` (Harmony): how far enemies hear you | ×0.75 | ×0.5 |
-| DepthNoise | MissionsConfig noiseLow/Medium/HighMultiplier (per-depth noise factors) | ×1 | ×1 |
-| DamageToEnemies | damage taken by enemy vessels, via `Ship.DamageShip` (Harmony) | ×1.6 | ×2 |
-| EnemyTorpedoSpeed | maxSpeed of torpedoes launched by enemies (Harmony) | ×0.8 | ×0.65 |
-| EnemyTorpedoTurnRate | rotationSpeed of torpedoes launched by enemies (Harmony) | ×0.7 | ×0.5 |
-| OpenWorldFuelUse *(experimental, see below)* | fuelEveryDistanceUnit | ×0.6 | ×0.4 |
-| OpenWorldFilterUse *(experimental, see below)* | filterEveryDistanceUnit | ×0.6 | ×0.4 |
-| OpenWorldFoodUse *(experimental, see below)* | sandwitchEveryDistanceUnit | ×0.6 | ×0.4 |
+| Knob | Game fields (`Indy.*Config`) | Default |
+|---|---|---|
+| HungerDuration | hungerDurationSeconds | ×3 |
+| StaminaDuration | staminaDurationSeconds | ×2.5 |
+| WorkStaminaDrain | staminaReductionRunningOrHeavyWork | ×0.6 |
+| StaminaRecovery | addStaminaSleepingSpeed, addStaminaPerCoffe | ×1.5 |
+| FuelDuration | engineFuelDurationSeconds | ×2.5 |
+| Co2FilterDuration | co2FilterDurationSeconds | ×2 |
+| SnorkelDuration | snorkelTankDuration | ×1 (vanilla) |
+| RefuelSpeed | refuelAmount | ×1 (vanilla) |
+| FaultRisk | riskOf* (leak / fire / fuse) | ×0.1 |
+| HitFaultChance | damage*Probability, damageEngineStop* | ×0.5 |
+| MaxFaultsPerType | nFires / nLeaks / nFuseBreaksMaxPerGame | 2 (= vanilla) |
+| FailuresToExplode | amountToFailuresToExplode | 25 (vanilla 20) |
+| PlayerDamage | damageFire / damageExplosion Min/Max | ×0.5 |
+| FireSpread | propagationProbability | ×0.5 |
+| FloodSpeed | waterLeakAdd | ×0.6 |
+| PumpSpeed | waterAspirationRemove | ×2 |
+| RepairSpeed | hullLeakFixAmount, pipeLeakFixAmount, extinFixAmount | ×1 (vanilla) |
+| MoveSpeed | walk / run / crouch / tired speeds | ×1.15 |
+| NoiseRadius | result of `Engine.GetNoiseRadius` (Harmony): how far enemies hear you | ×1 (vanilla) |
+| DepthNoise | MissionsConfig noiseLow/Medium/HighMultiplier (per-depth noise factors) | ×1 (vanilla) |
+| DamageToEnemies | damage taken by enemy vessels, via `Ship.DamageShip` (Harmony) | ×1 (vanilla) |
+| EnemyTorpedoSpeed | maxSpeed of torpedoes launched by enemies (Harmony) | ×1 (vanilla) |
+| EnemyTorpedoTurnRate | rotationSpeed of torpedoes launched by enemies (Harmony) | ×0.7 |
+| OpenWorldFuelUse *(experimental, see below)* | fuelEveryDistanceUnit | ×1 (vanilla) |
+| OpenWorldFilterUse *(experimental, see below)* | filterEveryDistanceUnit | ×1 (vanilla) |
+| OpenWorldFoodUse *(experimental, see below)* | sandwitchEveryDistanceUnit | ×1 (vanilla) |
 
-**Stealth.** `NoiseRadius` scales the radius at which enemies can hear the sub. `DepthNoise` scales the game's per-depth factors (×1.25 at 500 m, ×1.0 at 900 m, ×0.75 at 1500 m). The two probably stack, so the presets only use `NoiseRadius`. Set `DepthNoise` in Custom if you want it.
+**Stealth.** `NoiseRadius` scales the radius at which enemies can hear the sub. `DepthNoise` scales the game's per-depth factors (×1.25 at 500 m, ×1.0 at 900 m, ×0.75 at 1500 m). The two probably stack, so change one at a time.
 
 **Combat.** `DamageToEnemies` controls how many hits sink an enemy. Torpedo 1 does 0.66 damage. Enemy life is 1.0 (submarine, frigate), 1.2 (destroyer) and 2.0 (aircraft carrier), so vanilla takes 2 / 2 / 2 / 4 hits, ×1.6 takes 1 / 1 / 2 / 2, and ×2 takes 1 / 1 / 1 / 2. `EnemyTorpedoSpeed` and `EnemyTorpedoTurnRate` make enemy torpedoes easier to outrun and out-turn. Each enemy torpedo gets its own scaled copy of the weapon config, so your torpedoes are not affected.
 
@@ -213,6 +212,6 @@ Some features are not plain config values. They are Harmony patches in `Patches.
 The values are applied in the main menu, before any mission starts.
 
 To add a knob:
-1. Add a `Knob` in `Settings.cs`, with its vanilla, Easy and VeryEasy values.
+1. Add a `Knob` in `Settings.cs`, with its vanilla and default values.
 2. Bind it in `Settings.Bind`.
 3. Add `Tweak` entries in `Tweaks.cs` mapping it to game fields. Field names must match the interop property names; see `research/config_dumps/*.json` for every available field and its default.
