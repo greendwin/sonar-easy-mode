@@ -43,16 +43,16 @@ public static class Tweaks
     public static readonly Tweak[] All =
     {
         // Survival (Indy.LevelingConfig)
-        new(ConfigAsset.Leveling, "hungerDurationSeconds", Settings.SurvivalDuration),
-        new(ConfigAsset.Leveling, "staminaDurationSeconds", Settings.SurvivalDuration),
+        new(ConfigAsset.Leveling, "hungerDurationSeconds", Settings.HungerDuration),
+        new(ConfigAsset.Leveling, "staminaDurationSeconds", Settings.StaminaDuration),
         new(ConfigAsset.Leveling, "staminaReductionRunningOrHeavyWork", Settings.WorkStaminaDrain),
         new(ConfigAsset.Leveling, "addStaminaSleepingSpeed", Settings.StaminaRecovery),
         new(ConfigAsset.Leveling, "addStaminaPerCoffe", Settings.StaminaRecovery),
 
         // Consumables
-        new(ConfigAsset.Leveling, "engineFuelDurationSeconds", Settings.ConsumableDuration),
-        new(ConfigAsset.Leveling, "co2FilterDurationSeconds", Settings.ConsumableDuration),
-        new(ConfigAsset.Leveling, "snorkelTankDuration", Settings.ConsumableDuration),
+        new(ConfigAsset.Leveling, "engineFuelDurationSeconds", Settings.FuelDuration),
+        new(ConfigAsset.Leveling, "co2FilterDurationSeconds", Settings.Co2FilterDuration),
+        new(ConfigAsset.Leveling, "snorkelTankDuration", Settings.SnorkelDuration),
         new(ConfigAsset.Leveling, "refuelAmount", Settings.RefuelSpeed),
 
         // Random faults
@@ -99,9 +99,9 @@ public static class Tweaks
         new(ConfigAsset.Game, "tiredInjuredWalkSpeedCrouch", Settings.MoveSpeed),
 
         // Open world (Indy.OpenWorldLevelingConfig)
-        new(ConfigAsset.OpenWorld, "fuelEveryDistanceUnit", Settings.OpenWorldConsumption),
-        new(ConfigAsset.OpenWorld, "filterEveryDistanceUnit", Settings.OpenWorldConsumption),
-        new(ConfigAsset.OpenWorld, "sandwitchEveryDistanceUnit", Settings.OpenWorldConsumption),
+        new(ConfigAsset.OpenWorld, "fuelEveryDistanceUnit", Settings.OpenWorldFuelUse),
+        new(ConfigAsset.OpenWorld, "filterEveryDistanceUnit", Settings.OpenWorldFilterUse),
+        new(ConfigAsset.OpenWorld, "sandwitchEveryDistanceUnit", Settings.OpenWorldFoodUse),
     };
 
     // Original values keyed by (native object pointer, field) so a reloaded asset is handled separately.

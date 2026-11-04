@@ -142,10 +142,13 @@ After the first launch with the plugin, the config file `<GameDir>\BepInEx\confi
 
 | Knob | Game fields (`Indy.*Config`) | Easy | VeryEasy |
 |---|---|---|---|
-| SurvivalDuration | hungerDurationSeconds, staminaDurationSeconds | ×2 | ×3 |
+| HungerDuration | hungerDurationSeconds | ×2 | ×3 |
+| StaminaDuration | staminaDurationSeconds | ×2 | ×3 |
 | WorkStaminaDrain | staminaReductionRunningOrHeavyWork | ×0.6 | ×0.4 |
 | StaminaRecovery | addStaminaSleepingSpeed, addStaminaPerCoffe | ×1.5 | ×2 |
-| ConsumableDuration | engineFuelDurationSeconds, co2FilterDurationSeconds, snorkelTankDuration | ×2 | ×3 |
+| FuelDuration | engineFuelDurationSeconds | ×2 | ×3 |
+| Co2FilterDuration | co2FilterDurationSeconds | ×2 | ×3 |
+| SnorkelDuration | snorkelTankDuration | ×2 | ×3 |
 | RefuelSpeed | refuelAmount | ×1.5 | ×2 |
 | FaultRisk | riskOf* (leak / fire / fuse) | ×0.5 | ×0.25 |
 | HitFaultChance | damage*Probability, damageEngineStop* | ×0.6 | ×0.35 |
@@ -157,7 +160,11 @@ After the first launch with the plugin, the config file `<GameDir>\BepInEx\confi
 | PumpSpeed | waterAspirationRemove | ×1.5 | ×2 |
 | RepairSpeed | hullLeakFixAmount, pipeLeakFixAmount, extinFixAmount | ×1.5 | ×2 |
 | MoveSpeed | walk / run / crouch / tired speeds | ×1 | ×1.15 |
-| OpenWorldConsumption *(experimental)* | fuel / filter / sandwitchEveryDistanceUnit | ×0.6 | ×0.4 |
+| OpenWorldFuelUse *(experimental, see below)* | fuelEveryDistanceUnit | ×0.6 | ×0.4 |
+| OpenWorldFilterUse *(experimental, see below)* | filterEveryDistanceUnit | ×0.6 | ×0.4 |
+| OpenWorldFoodUse *(experimental, see below)* | sandwitchEveryDistanceUnit | ×0.6 | ×0.4 |
+
+**About the `OpenWorld*Use` knobs.** They apply only to the *Open World* game mode (free roaming between ports, selling loot and buying supplies). Each field is a balancing figure: how much of one fuel can, CO2 filter or sandwich is used per map "distance unit" of travel. A distance unit takes `timeToMoveDistanceUnit` = 0.2 s, so `fuelEveryDistanceUnit` = 0.2 / `durationFuelSeconds` (225) ≈ 0.00089, and the same for filter (300 s) and sandwich (262.5 s). The only code found reading them is `OpenWorldLevelingSimulator`, a developer bot that simulates a playthrough to tune prices and rewards. The real fuel, CO2 and hunger drain on the submarine in Open World most likely comes from the regular `Fuel/Co2Filter/HungerDuration` knobs. Expect these three knobs to change nothing in play; they stay in until this is confirmed in-game (see `research/NOTES.md`).
 
 ## 5. Uninstall
 
