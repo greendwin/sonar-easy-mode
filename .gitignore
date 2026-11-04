@@ -1,0 +1,10 @@
+# build 
+dist/
+bin/
+obj/
+*.user
+.vs/
+
+# locals
+local.mk
+research

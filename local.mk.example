@@ -1,0 +1,8 @@
+# Copy to local.mk (git-ignored) and adjust for your machine.
+
+# SONAR install folder (the one containing SONAR.exe). Forward slashes recommended.
+GAME_DIR = C:/Program Files (x86)/Steam/steamapps/common/SONAR
+
+# Optional: explicit dotnet executable (.NET 6+ SDK). By default the Makefile uses
+# %USERPROFILE%/.dotnet/dotnet.exe if present, otherwise `dotnet` from PATH.
+# DOTNET = C:/Program Files/dotnet/dotnet.exe
