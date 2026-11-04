@@ -20,6 +20,7 @@ public class Plugin : BasePlugin
     {
         Log = base.Log;
         Settings.Bind(Config);
+        Patches.Apply(Plugin.Guid);
         AddComponent<EasyModeDriver>();
         Log.LogInfo($"{Name} {Version} loaded. Preset={Settings.ActivePreset.Value}, OnlyWhenSolo={Settings.OnlyWhenSolo.Value}");
     }
@@ -38,6 +39,9 @@ public class EasyModeDriver : MonoBehaviour
     private bool? _lastActive;
     private int _lastVersion = -1;
     private int _lastPlayers = -1;
+
+    /// <summary>Current mode, read by the Harmony patches.</summary>
+    public static bool Active { get; private set; }
 
     public EasyModeDriver(IntPtr ptr) : base(ptr) { }
 
@@ -68,6 +72,7 @@ public class EasyModeDriver : MonoBehaviour
         bool active = Settings.Enabled.Value
                       && Settings.ActivePreset.Value != Preset.Off
                       && (!Settings.OnlyWhenSolo.Value || players <= 1);
+        Active = active;
 
         bool assetChanged = leveling.Pointer != _lastLevelingPtr;
         if (!assetChanged && active == _lastActive && Settings.Version == _lastVersion) return;

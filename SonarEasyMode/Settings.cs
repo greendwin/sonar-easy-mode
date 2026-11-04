@@ -36,6 +36,7 @@ public static class Settings
     public static ConfigEntry<bool> OnlyWhenSolo;
     public static ConfigEntry<Preset> ActivePreset;
     public static ConfigEntry<bool> VerboseLog;
+    public static ConfigEntry<bool> LinkFans;
 
     // Multipliers: 1 = vanilla. "Duration" knobs: higher = lasts longer. "Chance/speed" knobs: as named.
     public static readonly Knob HungerDuration = new("HungerDuration", 1f, 2f, 3f);
@@ -56,6 +57,11 @@ public static class Settings
     public static readonly Knob PumpSpeed = new("PumpSpeed", 1f, 1.5f, 2f);
     public static readonly Knob RepairSpeed = new("RepairSpeed", 1f, 1.5f, 2f);
     public static readonly Knob MoveSpeed = new("MoveSpeed", 1f, 1f, 1.15f);
+    public static readonly Knob NoiseRadius = new("NoiseRadius", 1f, 0.75f, 0.5f);
+    public static readonly Knob DepthNoise = new("DepthNoise", 1f, 1f, 1f);
+    public static readonly Knob DamageToEnemies = new("DamageToEnemies", 1f, 1.6f, 2f);
+    public static readonly Knob EnemyTorpedoSpeed = new("EnemyTorpedoSpeed", 1f, 0.8f, 0.65f);
+    public static readonly Knob EnemyTorpedoTurnRate = new("EnemyTorpedoTurnRate", 1f, 0.7f, 0.5f);
     public static readonly Knob OpenWorldFuelUse = new("OpenWorldFuelUse", 1f, 0.6f, 0.4f);
     public static readonly Knob OpenWorldFilterUse = new("OpenWorldFilterUse", 1f, 0.6f, 0.4f);
     public static readonly Knob OpenWorldFoodUse = new("OpenWorldFoodUse", 1f, 0.6f, 0.4f);
@@ -71,6 +77,8 @@ public static class Settings
         ActivePreset = cfg.Bind("General", "Preset", Preset.Easy,
             "Off = vanilla, Easy / VeryEasy = built-in values, Custom = use the [Custom] section below.");
         VerboseLog = cfg.Bind("General", "VerboseLog", false, "Log every field change.");
+        LinkFans = cfg.Bind("Features", "LinkFans", true,
+            "Toggling any fan switches all other fans to the same state (one switch for silent running). Works while easy mode is active.");
 
         BindKnob(cfg, HungerDuration, "Hunger bar lasts N times longer (hungerDurationSeconds).");
         BindKnob(cfg, StaminaDuration, "Stamina bar lasts N times longer (staminaDurationSeconds).");
@@ -90,6 +98,11 @@ public static class Settings
         BindKnob(cfg, PumpSpeed, "Pump water removal speed (multiplier).");
         BindKnob(cfg, RepairSpeed, "Welding, pipe repair and extinguishing speed (multiplier).");
         BindKnob(cfg, MoveSpeed, "Walk / run / crouch speed (multiplier).");
+        BindKnob(cfg, NoiseRadius, "Radius at which enemies hear your submarine (multiplier on Engine.GetNoiseRadius). Lower = quieter.");
+        BindKnob(cfg, DepthNoise, "Multiplier on the per-depth noise factors (MissionsConfig.noiseLow/Medium/HighMultiplier = 1.25 / 1.0 / 0.75 at 500 / 900 / 1500 m). Lower = quieter. Probably stacks with NoiseRadius, so presets leave it at 1.");
+        BindKnob(cfg, DamageToEnemies, "Damage enemy vessels take from any source (multiplier). Torpedo 1 does 0.66 against enemy sub / frigate life 1.0, destroyer 1.2, carrier 2.0: vanilla 2/2/2/4 hits, x1.6 = 1/1/2/2, x2 = 1/1/1/2.");
+        BindKnob(cfg, EnemyTorpedoSpeed, "Speed of torpedoes launched by enemies (multiplier). Your torpedoes are not affected.");
+        BindKnob(cfg, EnemyTorpedoTurnRate, "Turn rate of torpedoes launched by enemies (multiplier); lower = easier to evade. Your torpedoes are not affected.");
         BindKnob(cfg, OpenWorldFuelUse, "EXPERIMENTAL, Open World mode only, probably no in-game effect. Scales fuelEveryDistanceUnit: the fraction of a fuel can used per map distance unit (= timeToMoveDistanceUnit / durationFuelSeconds). The only code found reading it is the developers' balancing simulator (OpenWorldLevelingSimulator), not the submarine. Lower = less fuel per distance (multiplier).");
         BindKnob(cfg, OpenWorldFilterUse, "EXPERIMENTAL, Open World mode only, probably no in-game effect. Scales filterEveryDistanceUnit: the fraction of a CO2 filter used per map distance unit (= timeToMoveDistanceUnit / durationFilterSeconds). Same caveat as OpenWorldFuelUse (multiplier).");
         BindKnob(cfg, OpenWorldFoodUse, "EXPERIMENTAL, Open World mode only, probably no in-game effect. Scales sandwitchEveryDistanceUnit: the sandwiches eaten per map distance unit (= timeToMoveDistanceUnit / durationSandwitchSeconds). Same caveat as OpenWorldFuelUse (multiplier).");

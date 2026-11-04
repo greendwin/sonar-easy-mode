@@ -14,6 +14,7 @@ SonarEasyMode/            plugin source (C#, net6.0)
   Plugin.cs               entry point + EasyModeDriver (applies/restores values)
   Settings.cs             config file binding, presets, knobs
   Tweaks.cs               list of game fields touched by each knob
+  Patches.cs              Harmony patches: noise radius, enemy damage, enemy torpedoes, linked fans
 research/                 reverse-engineering notes (NOTES.md), decoded data, config dumps, scripts
 ```
 
@@ -160,9 +161,23 @@ After the first launch with the plugin, the config file `<GameDir>\BepInEx\confi
 | PumpSpeed | waterAspirationRemove | ×1.5 | ×2 |
 | RepairSpeed | hullLeakFixAmount, pipeLeakFixAmount, extinFixAmount | ×1.5 | ×2 |
 | MoveSpeed | walk / run / crouch / tired speeds | ×1 | ×1.15 |
+| NoiseRadius | result of `Engine.GetNoiseRadius` (Harmony): how far enemies hear you | ×0.75 | ×0.5 |
+| DepthNoise | MissionsConfig noiseLow/Medium/HighMultiplier (per-depth noise factors) | ×1 | ×1 |
+| DamageToEnemies | damage taken by enemy vessels, via `Ship.DamageShip` (Harmony) | ×1.6 | ×2 |
+| EnemyTorpedoSpeed | maxSpeed of torpedoes launched by enemies (Harmony) | ×0.8 | ×0.65 |
+| EnemyTorpedoTurnRate | rotationSpeed of torpedoes launched by enemies (Harmony) | ×0.7 | ×0.5 |
 | OpenWorldFuelUse *(experimental, see below)* | fuelEveryDistanceUnit | ×0.6 | ×0.4 |
 | OpenWorldFilterUse *(experimental, see below)* | filterEveryDistanceUnit | ×0.6 | ×0.4 |
 | OpenWorldFoodUse *(experimental, see below)* | sandwitchEveryDistanceUnit | ×0.6 | ×0.4 |
+
+**Stealth.** `NoiseRadius` scales the radius at which enemies can hear the sub. `DepthNoise` scales the game's per-depth factors (×1.25 at 500 m, ×1.0 at 900 m, ×0.75 at 1500 m). The two probably stack, so the presets only use `NoiseRadius`. Set `DepthNoise` in Custom if you want it.
+
+**Combat.** `DamageToEnemies` controls how many hits sink an enemy. Torpedo 1 does 0.66 damage. Enemy life is 1.0 (submarine, frigate), 1.2 (destroyer) and 2.0 (aircraft carrier), so vanilla takes 2 / 2 / 2 / 4 hits, ×1.6 takes 1 / 1 / 2 / 2, and ×2 takes 1 / 1 / 1 / 2. `EnemyTorpedoSpeed` and `EnemyTorpedoTurnRate` make enemy torpedoes easier to outrun and out-turn. Each enemy torpedo gets its own scaled copy of the weapon config, so your torpedoes are not affected.
+
+`[Features]`
+| Setting | Default | Meaning |
+|---|---|---|
+| `LinkFans` | `true` | Toggling any fan switches all other fans to the same state: one switch to go silent and back. Fans not installed yet (upgrade) are skipped. Works while easy mode is active. |
 
 **About the `OpenWorld*Use` knobs.** They apply only to the *Open World* game mode (free roaming between ports, selling loot and buying supplies). Each field is a balancing figure: how much of one fuel can, CO2 filter or sandwich is used per map "distance unit" of travel. A distance unit takes `timeToMoveDistanceUnit` = 0.2 s, so `fuelEveryDistanceUnit` = 0.2 / `durationFuelSeconds` (225) ≈ 0.00089, and the same for filter (300 s) and sandwich (262.5 s). The only code found reading them is `OpenWorldLevelingSimulator`, a developer bot that simulates a playthrough to tune prices and rewards. The real fuel, CO2 and hunger drain on the submarine in Open World most likely comes from the regular `Fuel/Co2Filter/HungerDuration` knobs. Expect these three knobs to change nothing in play; they stay in until this is confirmed in-game (see `research/NOTES.md`).
 
@@ -192,6 +207,8 @@ After the first launch with the plugin, the config file `<GameDir>\BepInEx\confi
 2. counts players through `Engine.multiplayer.GetPlayersCount()`,
 3. on first sight of an asset, records the original value of every field listed in `Tweaks.All`,
 4. writes `original × knob`, or the override value, while active, and restores the originals otherwise.
+
+Some features are not plain config values. They are Harmony patches in `Patches.cs`, which do nothing unless `EasyModeDriver.Active` is true. Each patch logs its first hit, for example `NoiseRadius: 120 -> 90`, so the log shows which hooks fire in play.
 
 The values are applied in the main menu, before any mission starts.
 

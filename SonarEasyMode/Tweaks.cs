@@ -11,6 +11,7 @@ public enum ConfigAsset
     Leveling,
     Game,
     OpenWorld,
+    Missions,
 }
 
 public enum TweakMode
@@ -98,6 +99,11 @@ public static class Tweaks
         new(ConfigAsset.Game, "tiredInjuredWalkSpeed", Settings.MoveSpeed),
         new(ConfigAsset.Game, "tiredInjuredWalkSpeedCrouch", Settings.MoveSpeed),
 
+        // Stealth (Indy.MissionsConfig): per-depth noise factors
+        new(ConfigAsset.Missions, "noiseLowMultiplier", Settings.DepthNoise),
+        new(ConfigAsset.Missions, "noiseMediumMultiplier", Settings.DepthNoise),
+        new(ConfigAsset.Missions, "noiseHighMultiplier", Settings.DepthNoise),
+
         // Open world (Indy.OpenWorldLevelingConfig)
         new(ConfigAsset.OpenWorld, "fuelEveryDistanceUnit", Settings.OpenWorldFuelUse),
         new(ConfigAsset.OpenWorld, "filterEveryDistanceUnit", Settings.OpenWorldFilterUse),
@@ -113,6 +119,7 @@ public static class Tweaks
         ConfigAsset.Leveling => engine.levelingConfig,
         ConfigAsset.Game => engine.gameConfig,
         ConfigAsset.OpenWorld => engine.openWorldLevelingConfig,
+        ConfigAsset.Missions => engine.missionsConfig,
         _ => null,
     };
 
