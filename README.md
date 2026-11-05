@@ -1,217 +1,129 @@
 # SONAR Easy Mode
 
-A BepInEx 6 (IL2CPP) plugin for **SONAR** that makes solo runs manageable. Hunger, stamina, fuel and CO2 last longer, there are fewer random faults, repairs are faster and you take less damage. By default it is active only while you are the only player, and vanilla values come back as soon as someone joins.
+A BepInEx 6 (IL2CPP) plugin that makes solo runs of **SONAR** more forgiving. It changes values in memory only, never game files. By default it applies only while you are the only player, and restores vanilla values when someone joins.
 
-The mod changes values in memory only. It never modifies game files.
+## Settings
 
-## Repository layout
+Config file: `<GameDir>\BepInEx\config\sonar.easymode.cfg`. It is created on first launch with the plugin. Edit it while the game is closed.
 
-```
-Makefile                  build / deploy / package helper
-local.mk.example          template for local.mk (your game path; local.mk is git-ignored)
-SonarEasyMode/            plugin source (C#, net6.0)
-  SonarEasyMode.csproj    project; references the game's BepInEx install
-  Plugin.cs               entry point + EasyModeDriver (applies/restores values)
-  Settings.cs             config file binding, presets, knobs
-  Tweaks.cs               list of game fields touched by each knob
-  Patches.cs              Harmony patches: noise radius, enemy damage, enemy torpedoes, linked fans
-research/                 reverse-engineering notes (NOTES.md), decoded data, config dumps, scripts
-```
+**[General]**
 
----
-
-## 1. Install BepInEx into the game
-
-The plugin needs **BepInEx 6 Bleeding Edge, IL2CPP, win-x64**, build **be.791 or newer**. Older builds can't read this game's metadata (Unity 6000.3, metadata v39).
-
-1. Download `BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.<N>+<hash>.zip` from <https://builds.bepinex.dev/projects/bepinex_be>.
-2. Open the game folder: Steam → SONAR → *Manage* → *Browse local files*, for example `<SteamLibrary>\steamapps\common\SONAR`.
-3. Extract the zip **into the game folder**, so that the following sit next to `SONAR.exe`:
-   ```
-   SONAR.exe
-   winhttp.dll
-   doorstop_config.ini
-   .doorstop_version
-   BepInEx\
-   dotnet\
-   ```
-4. **Launch the game once** and wait at the main menu. On this first run BepInEx generates the interop assemblies (`BepInEx\interop\*.dll`), which takes about 1–3 minutes. The game window may look frozen during this time.
-5. Check `BepInEx\LogOutput.log`. It should contain:
-   ```
-   [Info   :   BepInEx] Running under Unity 6000.3.19f1
-   [Message:   BepInEx] Chainloader startup complete
-   ```
-   and `BepInEx\interop\` should contain `Assembly-CSharp.dll` and about 128 other DLLs.
-
-> The interop folder is regenerated automatically when the game updates. This also happens on the first launch after a patch.
-
-## 2. Build the plugin
-
-### Prerequisites
-- **.NET SDK 6.0 or newer.** 8.0 is recommended; the project targets `net6.0`, which newer SDKs build fine.
-  - Normal install: <https://dotnet.microsoft.com/download>
-  - Or a per-user install without admin rights:
-    ```powershell
-    Invoke-WebRequest https://dot.net/v1/dotnet-install.ps1 -OutFile dotnet-install.ps1
-    .\dotnet-install.ps1 -Channel 8.0 -InstallDir "$env:USERPROFILE\.dotnet" -NoPath
-    $env:DOTNET_ROOT = "$env:USERPROFILE\.dotnet"; $env:PATH = "$env:DOTNET_ROOT;$env:PATH"
-    ```
-- **BepInEx installed in the game, with interop generated** (step 1). The project compiles against
-  `<GameDir>\BepInEx\core\*.dll` and `<GameDir>\BepInEx\interop\*.dll`. Nothing is downloaded from NuGet.
-
-### Local settings (`local.mk`)
-The repository contains no machine-specific paths. Set your game location once in a git-ignored `local.mk`:
-
-```
-cp local.mk.example local.mk      # or: copy local.mk.example local.mk
-```
-
-```make
-# local.mk
-# folder containing SONAR.exe (keep comments on their own lines: make keeps trailing spaces)
-GAME_DIR = C:/Program Files (x86)/Steam/steamapps/common/SONAR
-# optional, .NET 6+ SDK
-# DOTNET = C:/Program Files/dotnet/dotnet.exe
-```
-
-Variables passed on the command line (`make GAME_DIR=...`) override `local.mk`. If `GAME_DIR` isn't set anywhere, make stops with a hint.
-
-### Build with make (recommended)
-The root `Makefile` needs GNU make (for example `choco install make`). If `DOTNET` isn't set, it uses the per-user SDK in `%USERPROFILE%\.dotnet` when that exists, and otherwise `dotnet` from PATH.
-
-```
-make                      # build Release + copy DLL into the game (= make deploy)
-make build                # build only
-make deploy               # build + copy to <GAME_DIR>\BepInEx\plugins\SonarEasyMode
-make package              # build + dist\SonarEasyMode-<version>.zip for players
-make clean                # remove bin/obj/dist
-
-make GAME_DIR="E:/Games/Steam/steamapps/common/SONAR"   # one-off override of local.mk
-make CONFIG=Debug                                       # debug build
-```
-
-`deploy` refuses to run while `SONAR.exe` is running, because the DLL would be locked. `build` checks first that BepInEx interop exists in `GAME_DIR`.
-
-### Build with dotnet directly
-The project has no default game path. `dotnet` doesn't read `local.mk`, so pass `GameDir` explicitly, or set it as an environment variable (MSBuild picks environment variables up as properties). Run these from the repository root:
-
-```powershell
-# Build and deploy into the game
-dotnet build SonarEasyMode -c Release -p:GameDir="X:\Steam\steamapps\common\SONAR"
-
-# Same, via environment variable
-$env:GameDir = "X:\Steam\steamapps\common\SONAR"; dotnet build SonarEasyMode -c Release
-
-# Build only, no copy into the game
-dotnet build SonarEasyMode -c Release -p:GameDir="..." -p:Deploy=false
-```
-
-- Output: `SonarEasyMode\bin\Release\net6.0\SonarEasyMode.dll`
-- Deploy target: `<GameDir>\BepInEx\plugins\SonarEasyMode\SonarEasyMode.dll`
-- If `GameDir` is missing or BepInEx interop isn't there, the build fails with a clear error.
-
-> **Close the game before building.** While the game runs, the DLL is locked and the copy step fails. The build itself still succeeds.
-
-## 3. Install the plugin (without building)
-
-If you already have `SonarEasyMode.dll`:
-
-1. Complete step 1 (BepInEx installed, launched once).
-2. Create `<GameDir>\BepInEx\plugins\SonarEasyMode\` and put `SonarEasyMode.dll` in it.
-3. Launch the game. `BepInEx\LogOutput.log` should show:
-   ```
-   [Info   :   BepInEx] Loading [SONAR Easy Mode 0.1.0]
-   [Info   :SONAR Easy Mode] SONAR Easy Mode 0.1.0 loaded. Enabled=True, OnlyWhenSolo=True
-   [Info   :SONAR Easy Mode] Easy mode ACTIVE (players 1, <N> fields changed)
-   ```
-
-To share the mod, zip it with the folder structure intact (`BepInEx\plugins\SonarEasyMode\SonarEasyMode.dll`). Players then extract the zip into a game folder that already has BepInEx.
-
-## 4. Configure
-
-After the first launch with the plugin, the config file `<GameDir>\BepInEx\config\sonar.easymode.cfg` is created. Edit it while the game is closed; changes apply on the next launch.
-
-`[General]`
 | Setting | Default | Meaning |
 |---|---|---|
 | `Enabled` | `true` | Master switch |
-| `OnlyWhenSolo` | `true` | Apply only while you're the only player; vanilla values come back when others join |
-| `VerboseLog` | `false` | Log every field change (old → new, plus the vanilla value) |
+| `OnlyWhenSolo` | `true` | Apply only while you're the only player in the session |
+| `VerboseLog` | `false` | Log every changed value |
 
-`[Tweaks]` knobs. There are no presets: each knob has one default (tuned for solo play) and you edit it directly. For multipliers, `1` = vanilla; for absolute values, `-1` keeps the vanilla value. To turn everything off, set `Enabled = false`.
+**[Features]**
 
-| Knob | Game fields (`Indy.*Config`) | Default |
-|---|---|---|
-| HungerDuration | hungerDurationSeconds | ×3 |
-| StaminaDuration | staminaDurationSeconds | ×2.5 |
-| WorkStaminaDrain | staminaReductionRunningOrHeavyWork | ×0.6 |
-| StaminaRecovery | addStaminaSleepingSpeed, addStaminaPerCoffe | ×1.5 |
-| FuelDuration | engineFuelDurationSeconds | ×2.5 |
-| Co2FilterDuration | co2FilterDurationSeconds | ×2 |
-| SnorkelDuration | snorkelTankDuration | ×1 (vanilla) |
-| RefuelSpeed | refuelAmount | ×1 (vanilla) |
-| FaultRisk | riskOf* (leak / fire / fuse) | ×0.1 |
-| HitFaultChance | damage*Probability, damageEngineStop* | ×0.5 |
-| MaxFaultsPerType | nFires / nLeaks / nFuseBreaksMaxPerGame | 2 (= vanilla) |
-| FailuresToExplode | amountToFailuresToExplode | 25 (vanilla 20) |
-| PlayerDamage | damageFire / damageExplosion Min/Max | ×0.5 |
-| FireSpread | propagationProbability | ×0.5 |
-| FloodSpeed | waterLeakAdd | ×0.6 |
-| PumpSpeed | waterAspirationRemove | ×2 |
-| RepairSpeed | hullLeakFixAmount, pipeLeakFixAmount, extinFixAmount | ×1 (vanilla) |
-| MoveSpeed | walk / run / crouch / tired speeds | ×1.15 |
-| NoiseRadius | result of `Engine.GetNoiseRadius` (Harmony): how far enemies hear you | ×1 (vanilla) |
-| DepthNoise | MissionsConfig noiseLow/Medium/HighMultiplier (per-depth noise factors) | ×1 (vanilla) |
-| DamageToEnemies | damage taken by enemy vessels, via `Ship.DamageShip` (Harmony) | ×1 (vanilla) |
-| EnemyTorpedoSpeed | maxSpeed of torpedoes launched by enemies (Harmony) | ×1 (vanilla) |
-| EnemyTorpedoTurnRate | rotationSpeed of torpedoes launched by enemies (Harmony) | ×0.7 |
-| OpenWorldFuelUse *(experimental, see below)* | fuelEveryDistanceUnit | ×1 (vanilla) |
-| OpenWorldFilterUse *(experimental, see below)* | filterEveryDistanceUnit | ×1 (vanilla) |
-| OpenWorldFoodUse *(experimental, see below)* | sandwitchEveryDistanceUnit | ×1 (vanilla) |
-
-**Stealth.** `NoiseRadius` scales the radius at which enemies can hear the sub. `DepthNoise` scales the game's per-depth factors (×1.25 at 500 m, ×1.0 at 900 m, ×0.75 at 1500 m). The two probably stack, so change one at a time.
-
-**Combat.** `DamageToEnemies` controls how many hits sink an enemy. Torpedo 1 does 0.66 damage. Enemy life is 1.0 (submarine, frigate), 1.2 (destroyer) and 2.0 (aircraft carrier), so vanilla takes 2 / 2 / 2 / 4 hits, ×1.6 takes 1 / 1 / 2 / 2, and ×2 takes 1 / 1 / 1 / 2. `EnemyTorpedoSpeed` and `EnemyTorpedoTurnRate` make enemy torpedoes easier to outrun and out-turn. Each enemy torpedo gets its own scaled copy of the weapon config, so your torpedoes are not affected.
-
-`[Features]`
 | Setting | Default | Meaning |
 |---|---|---|
-| `LinkFans` | `true` | Toggling any fan switches all other fans to the same state: one switch to go silent and back. Fans not installed yet (upgrade) are skipped. Works while easy mode is active. |
+| `LinkFans` | `true` | Toggling any fan sets all fans to the same state, so one switch gives silent running |
 
-**About the `OpenWorld*Use` knobs.** They apply only to the *Open World* game mode (free roaming between ports, selling loot and buying supplies). Each field is a balancing figure: how much of one fuel can, CO2 filter or sandwich is used per map "distance unit" of travel. A distance unit takes `timeToMoveDistanceUnit` = 0.2 s, so `fuelEveryDistanceUnit` = 0.2 / `durationFuelSeconds` (225) ≈ 0.00089, and the same for filter (300 s) and sandwich (262.5 s). The only code found reading them is `OpenWorldLevelingSimulator`, a developer bot that simulates a playthrough to tune prices and rewards. The real fuel, CO2 and hunger drain on the submarine in Open World most likely comes from the regular `Fuel/Co2Filter/HungerDuration` knobs. Expect these three knobs to change nothing in play; they stay in until this is confirmed in-game (see `research/NOTES.md`).
+**[Tweaks]**: multipliers, where `1` = vanilla. For the two absolute values, `-1` = vanilla.
 
-## 5. Uninstall
+| Knob | Effect | Default |
+|---|---|---|
+| **Crew** | | |
+| `HungerDuration` | Hunger bar lasts N× longer | 3 |
+| `StaminaDuration` | Stamina bar lasts N× longer | 2.5 |
+| `WorkStaminaDrain` | Extra stamina drain from running / heavy work | 0.6 |
+| `StaminaRecovery` | Stamina from sleep and coffee | 1.5 |
+| `MoveSpeed` | Walk / run / crouch speed | 1.15 |
+| `PlayerDamage` | Damage taken from fire and explosions | 0.5 |
+| **Consumables** | | |
+| `FuelDuration` | Engine fuel lasts N× longer | 2.5 |
+| `Co2FilterDuration` | CO2 filter lasts N× longer | 2 |
+| `SnorkelDuration` | Snorkel tank lasts N× longer | 1 |
+| `RefuelSpeed` | Refueling speed | 1 |
+| **Faults** | | |
+| `FaultRisk` | Chance of random leaks / fires / fuse breaks | 0.1 |
+| `HitFaultChance` | Chance that a hit causes a fault or engine stop | 0.5 |
+| `MaxFaultsPerType` | Max fires / leaks / fuse breaks per mission (absolute, vanilla 2) | 2 |
+| `FailuresToExplode` | Failures before the sub is lost (absolute, vanilla 20) | 25 |
+| `FireSpread` | Fire propagation chance | 0.5 |
+| `FloodSpeed` | Water ingress from leaks | 0.6 |
+| `PumpSpeed` | Pump water removal | 2 |
+| `RepairSpeed` | Welding / pipe repair / extinguishing speed | 1 |
+| **Stealth and combat** | | |
+| `NoiseRadius` | Distance at which enemies hear you | 1 |
+| `DepthNoise` | Game's per-depth noise factors (×1.25 / 1.0 / 0.75 at 500 / 900 / 1500 m). Probably stacks with `NoiseRadius` | 1 |
+| `DamageToEnemies` | Damage enemy vessels take (see below) | 1 |
+| `EnemyTorpedoSpeed` | Speed of enemy torpedoes; yours are unaffected | 1 |
+| `EnemyTorpedoTurnRate` | Turn rate of enemy torpedoes; lower is easier to evade | 0.7 |
+| **Open World** *(experimental)* | | |
+| `OpenWorldFuelUse`, `OpenWorldFilterUse`, `OpenWorldFoodUse` | Fuel / filter / food use per map distance unit | 1 |
 
-- **Plugin only:** delete `<GameDir>\BepInEx\plugins\SonarEasyMode\`.
-- **Disable BepInEx temporarily:** set `enabled = false` in `<GameDir>\doorstop_config.ini`.
-- **Remove BepInEx completely:** delete `BepInEx\`, `dotnet\`, `winhttp.dll`, `doorstop_config.ini` and `.doorstop_version` from the game folder. You can also run Steam's *Verify integrity of game files*. That check doesn't remove the BepInEx files, but it restores any changed game files.
+**Hits to sink.** Torpedo 1 does 0.66 damage. Enemy life is 1.0 for a submarine or frigate, 1.2 for a destroyer and 2.0 for a carrier.
 
-## Troubleshooting
+| `DamageToEnemies` | Sub | Frigate | Destroyer | Carrier |
+|---|---|---|---|---|
+| 1 (vanilla) | 2 | 2 | 2 | 4 |
+| 1.6 | 1 | 1 | 2 | 2 |
+| 2 | 1 | 1 | 1 | 2 |
 
-| Symptom | Fix |
-|---|---|
-| No `BepInEx\LogOutput.log` after launch | `winhttp.dll` isn't next to `SONAR.exe`, or `doorstop_config.ini` has `enabled = false`. |
-| `Unsupported metadata version` in the log | The BepInEx build is too old. Use be.791 or newer. |
-| Build error: `Metadata file '...\BepInEx\interop\Assembly-CSharp.dll' could not be found` | BepInEx isn't installed at `GameDir`, or the game hasn't been launched once. Check `GAME_DIR` in `local.mk`, or pass `-p:GameDir=...`. |
-| `GAME_DIR is not set` / `GameDir is not set` | Create `local.mk` from `local.mk.example`, or pass the path explicitly. |
-| Build error `MSB3027` / file is locked | The game is running. Close it and rebuild. |
-| `Field 'X' not found on Indy.LevelingConfig (game update?)` | The game renamed a field. Update `Tweaks.cs`, and check `research/NOTES.md` for how fields were found. |
-| Log says `Vanilla values (... players 2 ...)` | Expected: `OnlyWhenSolo` is on and someone else is in the session. |
-| Mod is in multiplayer and others see odd behavior | Leave `OnlyWhenSolo = true`. The game is host-authoritative for many systems. |
+**Open World knobs.** These probably have no effect. The only code found reading these values is the developers' balancing simulator. Submarine drain in Open World most likely comes from the regular `Fuel/Co2Filter/HungerDuration` knobs. See `research/NOTES.md`.
 
-## How it works (for developers)
+## Install
 
-`EasyModeDriver` is a MonoBehaviour added by the plugin. Once per second it:
-1. reads `Indy.Engine.Instance` and its `levelingConfig`, `gameConfig` and `openWorldLevelingConfig` ScriptableObjects,
-2. counts players through `Engine.multiplayer.GetPlayersCount()`,
-3. on first sight of an asset, records the original value of every field listed in `Tweaks.All`,
-4. writes `original × knob`, or the override value, while active, and restores the originals otherwise.
+1. **BepInEx 6 Bleeding Edge, IL2CPP, win-x64, build be.791 or newer.** Older builds can't read this game's metadata.
+   1. Download it from <https://builds.bepinex.dev/projects/bepinex_be>.
+   2. Extract it into the game folder, next to `SONAR.exe`.
+   3. Launch the game once. The first start takes 1–3 minutes while BepInEx generates `BepInEx\interop\`.
+2. **The plugin:** put `SonarEasyMode.dll` into `<GameDir>\BepInEx\plugins\SonarEasyMode\`, or build it with `make` (below).
+3. **Check that it loaded.** `BepInEx\LogOutput.log` should contain `Easy mode ACTIVE (players 1, <N> fields changed)`.
 
-Some features are not plain config values. They are Harmony patches in `Patches.cs`, which do nothing unless `EasyModeDriver.Active` is true. Each patch logs its first hit, for example `NoiseRadius: 120 -> 90`, so the log shows which hooks fire in play.
+**Uninstall:** delete `BepInEx\plugins\SonarEasyMode\`. To disable BepInEx itself, set `enabled = false` in `doorstop_config.ini`.
 
-The values are applied in the main menu, before any mission starts.
+## Build
 
-To add a knob:
-1. Add a `Knob` in `Settings.cs`, with its vanilla and default values.
-2. Bind it in `Settings.Bind`.
-3. Add `Tweak` entries in `Tweaks.cs` mapping it to game fields. Field names must match the interop property names; see `research/config_dumps/*.json` for every available field and its default.
+Requirements:
+- .NET SDK 6+ (8 recommended).
+- GNU make (for example `choco install make`).
+- BepInEx installed in the game with interop generated (Install step 1). The project compiles against `<GameDir>\BepInEx\core` and `<GameDir>\BepInEx\interop`.
+
+Set your game path once in a git-ignored `local.mk`:
+
+```
+copy local.mk.example local.mk
+```
+```make
+# keep comments on their own lines: make keeps trailing spaces
+GAME_DIR = C:/Program Files (x86)/Steam/steamapps/common/SONAR
+```
+
+```
+make            # build and copy the DLL into the game (close the game first)
+make build      # build only
+make package    # dist\SonarEasyMode-<version>.zip
+make clean
+```
+
+Without make, pass the path yourself:
+
+```
+dotnet build SonarEasyMode -c Release -p:GameDir="X:\...\SONAR"
+```
+
+Add `-p:Deploy=false` to skip copying the DLL into the game.
+
+## Developer notes
+
+- **`Plugin.cs`**: `EasyModeDriver` runs once per second.
+  - It reads `Indy.Engine.Instance`, counts players, and decides whether the mod is active.
+  - It then applies or restores the config values.
+- **`Tweaks.cs`**: maps knobs to fields of the game's config ScriptableObjects (`LevelingConfig`, `GameConfig`, `MissionsConfig`, `OpenWorldLevelingConfig`).
+  - Original values are saved on first sight and restored when the mod is inactive.
+- **`Patches.cs`**: Harmony patches for things that are not plain config values:
+  - `Engine.GetNoiseRadius` (NoiseRadius)
+  - `Ship.DamageShip` (DamageToEnemies)
+  - `Torpedo.LaunchWeapon` (enemy torpedoes get a scaled copy of their weapon config)
+  - fan toggles (LinkFans)
+
+  Each patch logs its first hit, so `LogOutput.log` shows which hooks fire in play.
+- **`Settings.cs`**: config binding. To add a knob:
+  1. Add a `Knob(key, vanilla, default)`.
+  2. Bind it in `Settings.Bind`.
+  3. Map it to fields in `Tweaks.cs`, or use it in a patch.
+- **Game update breaks a field:** the log shows `Field 'X' not found` or `Patch X failed`.
+- **Research:** `research/NOTES.md` holds the reverse-engineering notes. `research/config_dumps/*.json` lists every config field with its default.
