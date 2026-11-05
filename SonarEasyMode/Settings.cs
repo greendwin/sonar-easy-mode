@@ -20,12 +20,23 @@ public sealed class Knob
     }
 }
 
+/// <summary>What toggling one fan does to the others.</summary>
+public enum FanLinkMode
+{
+    /// <summary>Vanilla: each fan is switched on its own.</summary>
+    Off,
+    /// <summary>Every fan in the submarine follows the toggled one.</summary>
+    ToggleAll,
+    /// <summary>Only fans on the same floor as the toggled one follow it.</summary>
+    ToggleFloor,
+}
+
 public static class Settings
 {
     public static ConfigEntry<bool> Enabled;
     public static ConfigEntry<bool> OnlyWhenSolo;
     public static ConfigEntry<bool> VerboseLog;
-    public static ConfigEntry<bool> LinkFans;
+    public static ConfigEntry<FanLinkMode> FanLink;
 
     // Defaults are the tuned solo values; 1 (or -1 for absolute knobs) = vanilla. "Duration" knobs: higher = lasts longer. "Chance/speed" knobs: as named.
     public static readonly Knob HungerDuration = new("HungerDuration", 1f, 3f);
@@ -64,8 +75,9 @@ public static class Settings
         OnlyWhenSolo = cfg.Bind("General", "OnlyWhenSolo", true,
             "Apply only while you are the only player in the session (vanilla values are restored when others join).");
         VerboseLog = cfg.Bind("General", "VerboseLog", false, "Log every field change.");
-        LinkFans = cfg.Bind("Features", "LinkFans", true,
-            "Toggling any fan switches all other fans to the same state (one switch for silent running). Works while easy mode is active.");
+        FanLink = cfg.Bind("Features", "FanLink", FanLinkMode.ToggleFloor,
+            "What toggling a fan does to the other fans. Off = vanilla. ToggleAll = every fan follows (one switch for silent running). " +
+            "ToggleFloor = only fans on the same floor follow, so silent running needs one switch per floor. Works while easy mode is active.");
 
         BindKnob(cfg, HungerDuration, "Hunger bar lasts N times longer (hungerDurationSeconds).");
         BindKnob(cfg, StaminaDuration, "Stamina bar lasts N times longer (staminaDurationSeconds).");

@@ -136,28 +136,38 @@ internal static class EnemyTorpedoPatch
     }
 }
 
-/// <summary>Toggling one fan sets every other fan to the same state.</summary>
+/// <summary>Toggling one fan sets other fans (all of them, or those on its floor) to the same state.</summary>
 internal static class FanLink
 {
     internal static bool Busy;
 
-    internal static bool Enabled => EasyModeDriver.Active && Settings.LinkFans.Value && !Busy;
+    internal static bool Enabled => EasyModeDriver.Active && Settings.FanLink.Value != FanLinkMode.Off && !Busy;
 
     internal static void SyncAllTo(bool on, FanController source)
     {
         Busy = true;
         try
         {
+            var mode = Settings.FanLink.Value;
+            // Floors come from the game's own zone topology (upper / lower floor zone lists).
+            var topology = mode == FanLinkMode.ToggleFloor ? source?.submarine?.subTopology ?? Engine.Instance?.subTopology : null;
+            if (mode == FanLinkMode.ToggleFloor && (source == null || topology == null))
+            {
+                Patches.ReportOnce("fans:notopology", "FanLink: no submarine topology, ToggleFloor does nothing");
+                return;
+            }
+
             int changed = 0;
             var all = UnityEngine.Object.FindObjectsByType<FanController>(FindObjectsSortMode.None);
             foreach (var fan in all)
             {
                 if (fan == null || (source != null && fan.Pointer == source.Pointer)) continue;
                 if (fan.upgradeBlocked || fan.IsOn() == on) continue;
+                if (topology != null && !topology.IsInSameFloor(source.zoneType, fan.zoneType)) continue;
                 fan.SetStatus(on, true);
                 changed++;
             }
-            Patches.ReportOnce("fans", $"LinkFans: switched {changed} other fan(s) {(on ? "on" : "off")}");
+            Patches.ReportOnce("fans", $"FanLink ({mode}): switched {changed} other fan(s) {(on ? "on" : "off")}");
         }
         finally
         {

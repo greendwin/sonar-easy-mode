@@ -18,7 +18,7 @@ Config file: `<GameDir>\BepInEx\config\sonar.easymode.cfg`. It is created on fir
 
 | Setting | Default | Meaning |
 |---|---|---|
-| `LinkFans` | `true` | Toggling any fan sets all fans to the same state, so one switch gives silent running |
+| `FanLink` | `ToggleFloor` | What toggling a fan does to the others. `Off`: vanilla. `ToggleAll`: every fan follows, so one switch gives silent running. `ToggleFloor`: only fans on the same floor follow, so silent running needs one switch on each floor |
 
 **[Tweaks]**: multipliers, where `1` = vanilla. For the two absolute values, `-1` = vanilla.
 
@@ -118,7 +118,7 @@ Add `-p:Deploy=false` to skip copying the DLL into the game.
   - `Engine.GetNoiseRadius` (NoiseRadius)
   - `Ship.DamageShip` (DamageToEnemies)
   - `Torpedo.LaunchWeapon` (enemy torpedoes get a scaled copy of their weapon config)
-  - fan toggles (LinkFans)
+  - fan toggles (FanLink)
 
   Each patch logs its first hit, so `LogOutput.log` shows which hooks fire in play.
 - **`Settings.cs`**: config binding. To add a knob:
