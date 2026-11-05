@@ -104,6 +104,9 @@ public static class Tweaks
         new(ConfigAsset.Missions, "noiseMediumMultiplier", Settings.DepthNoise),
         new(ConfigAsset.Missions, "noiseHighMultiplier", Settings.DepthNoise),
 
+        // Escorted ships (Indy.MissionsConfig)
+        new(ConfigAsset.Missions, "civilShipRangeToReduceSpeedBecauseOfMines", Settings.MineSlowdownRange),
+
         // Open world (Indy.OpenWorldLevelingConfig)
         new(ConfigAsset.OpenWorld, "fuelEveryDistanceUnit", Settings.OpenWorldFuelUse),
         new(ConfigAsset.OpenWorld, "filterEveryDistanceUnit", Settings.OpenWorldFilterUse),

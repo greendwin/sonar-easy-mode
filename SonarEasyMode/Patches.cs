@@ -16,7 +16,8 @@ public static class Patches
         var harmony = new Harmony(harmonyId);
         // Patch class by class so one missing method (game update) does not disable the rest.
         foreach (var type in new[] { typeof(NoiseRadiusPatch), typeof(DamageShipPatch), typeof(EnemyTorpedoPatch),
-                     typeof(FanTogglePatch), typeof(FansTogglePatch) })
+                     typeof(FanTogglePatch), typeof(FansTogglePatch),
+                     typeof(LeaderboardUiUploadPatch), typeof(LeaderboardUploadTimePatch), typeof(LeaderboardUploadPvpPatch) })
         {
             try
             {
@@ -227,4 +228,39 @@ internal static class FansTogglePatch
             states[i] = fans[i] != null && fans[i].IsOn();
         return states;
     }
+}
+
+/// <summary>
+/// No leaderboard uploads while the mod is enabled, so eased runs never reach the public boards.
+/// Keyed on the Enabled switch rather than Active: Active is also true in menus, so it cannot tell
+/// whether the finished mission was played with modded values. Set Enabled = false to play ranked.
+/// </summary>
+internal static class LeaderboardBlock
+{
+    internal static bool Blocked(string what)
+    {
+        if (!Settings.Enabled.Value) return false;
+        Patches.ReportOnce("leaderboard:" + what, $"Leaderboard: {what} upload skipped (SONAR Easy Mode is enabled)");
+        return true;
+    }
+}
+
+/// <summary>The end-of-mission upload; skipping it here keeps the UI out of a pending-upload state.</summary>
+[HarmonyPatch(typeof(AppUI), nameof(AppUI.LeaderboardUploadTime))]
+internal static class LeaderboardUiUploadPatch
+{
+    private static bool Prefix() => !LeaderboardBlock.Blocked("mission time");
+}
+
+/// <summary>Safety net for any other caller of the upload API.</summary>
+[HarmonyPatch(typeof(AbyLib.Leaderboards), nameof(AbyLib.Leaderboards.UploadTime))]
+internal static class LeaderboardUploadTimePatch
+{
+    private static bool Prefix() => !LeaderboardBlock.Blocked("time");
+}
+
+[HarmonyPatch(typeof(AbyLib.Leaderboards), nameof(AbyLib.Leaderboards.UploadPvpScore))]
+internal static class LeaderboardUploadPvpPatch
+{
+    private static bool Prefix() => !LeaderboardBlock.Blocked("PvP score");
 }

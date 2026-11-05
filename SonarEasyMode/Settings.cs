@@ -62,6 +62,9 @@ public static class Settings
     public static readonly Knob DamageToEnemies = new("DamageToEnemies", 1f, 1f);
     public static readonly Knob EnemyTorpedoSpeed = new("EnemyTorpedoSpeed", 1f, 1f);
     public static readonly Knob EnemyTorpedoTurnRate = new("EnemyTorpedoTurnRate", 1f, 0.7f);
+    public static readonly Knob AllyShipSpeed = new("AllyShipSpeed", 1f, 0.8f);
+    public static readonly Knob EnemyShipSpeed = new("EnemyShipSpeed", 1f, 0.8f);
+    public static readonly Knob MineSlowdownRange = new("MineSlowdownRange", 1f, 1f);
     public static readonly Knob OpenWorldFuelUse = new("OpenWorldFuelUse", 1f, 1f);
     public static readonly Knob OpenWorldFilterUse = new("OpenWorldFilterUse", 1f, 1f);
     public static readonly Knob OpenWorldFoodUse = new("OpenWorldFoodUse", 1f, 1f);
@@ -71,7 +74,7 @@ public static class Settings
 
     public static void Bind(ConfigFile cfg)
     {
-        Enabled = cfg.Bind("General", "Enabled", true, "Master switch.");
+        Enabled = cfg.Bind("General", "Enabled", true, "Master switch. While on, nothing is uploaded to the leaderboards.");
         OnlyWhenSolo = cfg.Bind("General", "OnlyWhenSolo", true,
             "Apply only while you are the only player in the session (vanilla values are restored when others join).");
         VerboseLog = cfg.Bind("General", "VerboseLog", false, "Log every field change.");
@@ -102,6 +105,9 @@ public static class Settings
         BindKnob(cfg, DamageToEnemies, "Damage enemy vessels take from any source (multiplier). Torpedo 1 does 0.66 against enemy sub / frigate life 1.0, destroyer 1.2, carrier 2.0: vanilla 2/2/2/4 hits, x1.6 = 1/1/2/2, x2 = 1/1/1/2.");
         BindKnob(cfg, EnemyTorpedoSpeed, "Speed of torpedoes launched by enemies (multiplier). Your torpedoes are not affected.");
         BindKnob(cfg, EnemyTorpedoTurnRate, "Turn rate of torpedoes launched by enemies (multiplier); lower = easier to evade. Your torpedoes are not affected.");
+        BindKnob(cfg, AllyShipSpeed, "Speed of civilian / allied ships, e.g. the ship you escort (multiplier on Ship.speedMultiplier, on top of the mission's own value).");
+        BindKnob(cfg, EnemyShipSpeed, "Speed of enemy vessels (multiplier on Ship.speedMultiplier).");
+        BindKnob(cfg, MineSlowdownRange, "Range at which a civilian ship slows down because of mines ahead (MissionsConfig.civilShipRangeToReduceSpeedBecauseOfMines = 200). 0 = never slows down. Careful: the slowdown is what gives you time to clear mines in escort missions like Mined Waters, so without it the ship may sail into them (multiplier).");
         BindKnob(cfg, OpenWorldFuelUse, "EXPERIMENTAL, Open World mode only, probably no in-game effect. Scales fuelEveryDistanceUnit: the fraction of a fuel can used per map distance unit (= timeToMoveDistanceUnit / durationFuelSeconds). The only code found reading it is the developers' balancing simulator (OpenWorldLevelingSimulator), not the submarine. Lower = less fuel per distance (multiplier).");
         BindKnob(cfg, OpenWorldFilterUse, "EXPERIMENTAL, Open World mode only, probably no in-game effect. Scales filterEveryDistanceUnit: the fraction of a CO2 filter used per map distance unit (= timeToMoveDistanceUnit / durationFilterSeconds). Same caveat as OpenWorldFuelUse (multiplier).");
         BindKnob(cfg, OpenWorldFoodUse, "EXPERIMENTAL, Open World mode only, probably no in-game effect. Scales sandwitchEveryDistanceUnit: the sandwiches eaten per map distance unit (= timeToMoveDistanceUnit / durationSandwitchSeconds). Same caveat as OpenWorldFuelUse (multiplier).");

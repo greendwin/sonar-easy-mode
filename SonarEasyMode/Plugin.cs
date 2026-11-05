@@ -72,6 +72,7 @@ public class EasyModeDriver : MonoBehaviour
         bool active = Settings.Enabled.Value
                       && (!Settings.OnlyWhenSolo.Value || players <= 1);
         Active = active;
+        ShipSpeeds.Apply(active);
 
         bool assetChanged = leveling.Pointer != _lastLevelingPtr;
         if (!assetChanged && active == _lastActive && Settings.Version == _lastVersion) return;

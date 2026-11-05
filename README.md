@@ -2,6 +2,8 @@
 
 A BepInEx 6 (IL2CPP) plugin that makes solo runs of **SONAR** more forgiving. It changes values in memory only, never game files. By default it applies only while you are the only player, and restores vanilla values when someone joins.
 
+While `Enabled = true`, no times or PvP scores are uploaded to the leaderboards, even in sessions where vanilla values apply. Set `Enabled = false` to play ranked.
+
 ## Settings
 
 Config file: `<GameDir>\BepInEx\config\sonar.easymode.cfg`. It is created on first launch with the plugin. Edit it while the game is closed.
@@ -10,7 +12,7 @@ Config file: `<GameDir>\BepInEx\config\sonar.easymode.cfg`. It is created on fir
 
 | Setting | Default | Meaning |
 |---|---|---|
-| `Enabled` | `true` | Master switch |
+| `Enabled` | `true` | Master switch. While on, nothing is uploaded to the leaderboards |
 | `OnlyWhenSolo` | `true` | Apply only while you're the only player in the session |
 | `VerboseLog` | `false` | Log every changed value |
 
@@ -51,6 +53,9 @@ Config file: `<GameDir>\BepInEx\config\sonar.easymode.cfg`. It is created on fir
 | `DamageToEnemies` | Damage enemy vessels take (see below) | 1 |
 | `EnemyTorpedoSpeed` | Speed of enemy torpedoes; yours are unaffected | 1 |
 | `EnemyTorpedoTurnRate` | Turn rate of enemy torpedoes; lower is easier to evade | 0.7 |
+| `AllyShipSpeed` | Speed of civilian / allied ships, e.g. the ship you escort | 0.8 |
+| `EnemyShipSpeed` | Speed of enemy vessels | 0.8 |
+| `MineSlowdownRange` | Range at which an escorted ship slows down for mines ahead (vanilla 200). 0 = never slows down, but then it may sail into mines you haven't cleared | 1 |
 | **Open World** *(experimental)* | | |
 | `OpenWorldFuelUse`, `OpenWorldFilterUse`, `OpenWorldFoodUse` | Fuel / filter / food use per map distance unit | 1 |
 
@@ -114,11 +119,13 @@ Add `-p:Deploy=false` to skip copying the DLL into the game.
   - It then applies or restores the config values.
 - **`Tweaks.cs`**: maps knobs to fields of the game's config ScriptableObjects (`LevelingConfig`, `GameConfig`, `MissionsConfig`, `OpenWorldLevelingConfig`).
   - Original values are saved on first sight and restored when the mod is inactive.
+- **`ShipSpeeds.cs`**: once per driver tick, scales `Ship.speedMultiplier` of civilian and enemy ships (`AllyShipSpeed` / `EnemyShipSpeed`), the same multiplier the game's debug menu sets. A value the game sets later becomes the new baseline.
 - **`Patches.cs`**: Harmony patches for things that are not plain config values:
   - `Engine.GetNoiseRadius` (NoiseRadius)
   - `Ship.DamageShip` (DamageToEnemies)
   - `Torpedo.LaunchWeapon` (enemy torpedoes get a scaled copy of their weapon config)
   - fan toggles (FanLink)
+  - `AppUI.LeaderboardUploadTime`, `AbyLib.Leaderboards.UploadTime` / `UploadPvpScore` (skipped while `Enabled`)
 
   Each patch logs its first hit, so `LogOutput.log` shows which hooks fire in play.
 - **`Settings.cs`**: config binding. To add a knob:
