@@ -37,6 +37,7 @@ public static class Settings
     public static ConfigEntry<bool> OnlyWhenSolo;
     public static ConfigEntry<bool> VerboseLog;
     public static ConfigEntry<FanLinkMode> FanLink;
+    public static ConfigEntry<bool> TubeAutoLoad;
 
     // Defaults are the tuned solo values; 1 (or -1 for absolute knobs) = vanilla. "Duration" knobs: higher = lasts longer. "Chance/speed" knobs: as named.
     public static readonly Knob HungerDuration = new("HungerDuration", 1f, 3f);
@@ -81,6 +82,9 @@ public static class Settings
         FanLink = cfg.Bind("Features", "FanLink", FanLinkMode.ToggleFloor,
             "What toggling a fan does to the other fans. Off = vanilla. ToggleAll = every fan follows (one switch for silent running). " +
             "ToggleFloor = only fans on the same floor follow, so silent running needs one switch per floor. Works while easy mode is active.");
+        TubeAutoLoad = cfg.Bind("Features", "TubeAutoLoad", true,
+            "Loading a tube by hand also moves one torpedo of the same type from the rack into the next free tube. " +
+            "Skipped when the rack has none of that type or all tubes are full; no torpedo is created or lost. Works while easy mode is active.");
 
         BindKnob(cfg, HungerDuration, "Hunger bar lasts N times longer (hungerDurationSeconds).");
         BindKnob(cfg, StaminaDuration, "Stamina bar lasts N times longer (staminaDurationSeconds).");

@@ -16,7 +16,7 @@ public static class Patches
         var harmony = new Harmony(harmonyId);
         // Patch class by class so one missing method (game update) does not disable the rest.
         foreach (var type in new[] { typeof(NoiseRadiusPatch), typeof(DamageShipPatch), typeof(EnemyTorpedoPatch),
-                     typeof(FanTogglePatch), typeof(FansTogglePatch),
+                     typeof(FanTogglePatch), typeof(FansTogglePatch), typeof(TubeLoadPatch), typeof(TubeLoadByIndexPatch),
                      typeof(LeaderboardUiUploadPatch), typeof(LeaderboardUploadTimePatch), typeof(LeaderboardUploadPvpPatch) })
         {
             try

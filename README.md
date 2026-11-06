@@ -21,6 +21,7 @@ Config file: `<GameDir>\BepInEx\config\sonar.easymode.cfg`. It is created on fir
 | Setting | Default | Meaning |
 |---|---|---|
 | `FanLink` | `ToggleFloor` | What toggling a fan does to the others. `Off`: vanilla. `ToggleAll`: every fan follows, so one switch gives silent running. `ToggleFloor`: only fans on the same floor follow, so silent running needs one switch on each floor |
+| `TubeAutoLoad` | `true` | Loading a tube by hand also moves one torpedo of the same type from the rack into the next free tube. Skipped if the rack has none of that type or every tube is full. No torpedo is created or lost |
 
 **[Tweaks]**: multipliers, where `1` = vanilla. For the two absolute values, `-1` = vanilla.
 
@@ -120,6 +121,7 @@ Add `-p:Deploy=false` to skip copying the DLL into the game.
 - **`Tweaks.cs`**: maps knobs to fields of the game's config ScriptableObjects (`LevelingConfig`, `GameConfig`, `MissionsConfig`, `OpenWorldLevelingConfig`).
   - Original values are saved on first sight and restored when the mod is inactive.
 - **`ShipSpeeds.cs`**: once per driver tick, scales `Ship.speedMultiplier` of civilian and enemy ships (`AllyShipSpeed` / `EnemyShipSpeed`), the same multiplier the game's debug menu sets. A value the game sets later becomes the new baseline.
+- **`TubeAutoLoad.cs`**: postfixes on `TorpedoTubes.LoadItem` / `LoadItemByIndex`. Takes a same-type torpedo off a rack `SingleSpot`, loads it into the next free tube through `TorpedoTubes.LoadItem`, and puts it back on the rack if the tube did not take it.
 - **`Patches.cs`**: Harmony patches for things that are not plain config values:
   - `Engine.GetNoiseRadius` (NoiseRadius)
   - `Ship.DamageShip` (DamageToEnemies)
