@@ -99,9 +99,8 @@ GAME_DIR = C:/Program Files (x86)/Steam/steamapps/common/SONAR
 ```
 
 ```
-make            # build and copy the DLL into the game (close the game first)
-make build      # build only
-make package    # dist\SonarEasyMode-<version>.zip
+make build      # build + dist\SonarEasyMode-<version>.zip for a GitHub release (same as `make`)
+make deploy     # build and copy the DLL into the game (close the game first)
 make clean
 ```
 

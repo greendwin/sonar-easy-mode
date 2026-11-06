@@ -8,11 +8,11 @@ using UnityEngine;
 namespace SonarEasyMode;
 
 [BepInPlugin(Guid, Name, Version)]
-public class Plugin : BasePlugin
+public partial class Plugin : BasePlugin
 {
     public const string Guid = "sonar.easymode";
     public const string Name = "SONAR Easy Mode";
-    public const string Version = "0.1.0";
+    // Version is generated from version.txt (see GenerateVersionConst in the csproj).
 
     internal static new ManualLogSource Log;
 

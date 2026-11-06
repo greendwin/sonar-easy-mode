@@ -4,7 +4,8 @@
     <TargetFramework>net6.0</TargetFramework>
     <AssemblyName>SonarEasyMode</AssemblyName>
     <RootNamespace>SonarEasyMode</RootNamespace>
-    <Version>0.1.0</Version>
+    <!-- Single source of truth: ../version.txt (also feeds Plugin.Version and the Makefile zip name). -->
+    <Version>$([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)../version.txt').Trim())</Version>
     <LangVersion>latest</LangVersion>
     <Nullable>disable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -32,6 +33,19 @@
     <Reference Include="$(BepInExDir)\interop\UnityEngine.dll" Private="false" />
     <Reference Include="$(BepInExDir)\interop\Assembly-CSharp.dll" Private="false" />
   </ItemGroup>
+
+  <!-- BepInPlugin needs a compile-time constant, so generate Plugin.Version from $(Version). -->
+  <Target Name="GenerateVersionConst" BeforeTargets="CoreCompile">
+    <PropertyGroup>
+      <VersionConstFile>$(IntermediateOutputPath)Plugin.Version.g.cs</VersionConstFile>
+    </PropertyGroup>
+    <WriteLinesToFile File="$(VersionConstFile)" Overwrite="true" WriteOnlyWhenDifferent="true"
+                      Lines="namespace SonarEasyMode%3B;public partial class Plugin { public const string Version = &quot;$(Version)&quot;%3B }" />
+    <ItemGroup>
+      <Compile Include="$(VersionConstFile)" />
+      <FileWrites Include="$(VersionConstFile)" />
+    </ItemGroup>
+  </Target>
 
   <Target Name="DeployToGame" AfterTargets="Build" Condition="'$(Deploy)' != 'false'">
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(BepInExDir)\plugins\SonarEasyMode" />
