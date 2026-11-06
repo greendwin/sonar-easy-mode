@@ -1,0 +1,52 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root { --bg: #061317; --line: #17414a; --ping: #4cf2b0; --ping-dim: #2a8f6a; --text: #d9f3ea; --muted: #7fa69a; }
+html, body { width: 1300px; height: 372px; overflow: hidden; }
+body {
+  background: radial-gradient(ellipse at 75% 50%, #0f2f33 0%, var(--bg) 65%);
+  color: var(--text); font-family: "Segoe UI", system-ui, sans-serif; position: relative;
+}
+.grid-bg {
+  position: absolute; inset: 0; opacity: .3;
+  background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 40px 40px;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 40%, #000 100%);
+}
+.sonar { position: absolute; right: -30px; top: 50%; transform: translateY(-50%); width: 560px; height: 560px; }
+.title { position: absolute; left: 70px; top: 50%; transform: translateY(-50%); }
+.sub { font-size: 24px; letter-spacing: 12px; color: var(--muted); font-weight: 600; }
+h1 { font-size: 112px; font-weight: 800; letter-spacing: -2px; line-height: 1; margin-top: 4px; }
+.glow { color: var(--ping); text-shadow: 0 0 24px rgba(76,242,176,.45); }
+.tagline { font-size: 26px; margin-top: 14px; }
+.tags { margin-top: 22px; display: flex; gap: 12px; }
+.tag { border: 2px solid var(--ping-dim); color: var(--ping); padding: 5px 14px; border-radius: 5px;
+  font-family: Consolas, monospace; font-size: 17px; letter-spacing: 2px; text-transform: uppercase; }
+</style></head><body>
+<div class="grid-bg"></div>
+<svg class="sonar" viewBox="-500 -500 1000 1000">
+  <defs>
+    <radialGradient id="g" r=".5"><stop offset="0" stop-color="#0f3a37"/><stop offset="1" stop-color="#061317"/></radialGradient>
+    <linearGradient id="sweep" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#4cf2b0" stop-opacity="0"/><stop offset="1" stop-color="#4cf2b0" stop-opacity=".55"/></linearGradient>
+  </defs>
+  <circle r="470" fill="url(#g)" stroke="#2a8f6a" stroke-width="4"/>
+  <g fill="none" stroke="#1d5e4b" stroke-width="3">
+    <circle r="360"/><circle r="250"/><circle r="140"/>
+    <line x1="-470" y1="0" x2="470" y2="0"/><line x1="0" y1="-470" x2="0" y2="470"/>
+  </g>
+  <path d="M0 0 L470 0 A470 470 0 0 0 332 -332 Z" fill="url(#sweep)" transform="rotate(-20)"/>
+  <line x1="0" y1="0" x2="470" y2="0" stroke="#4cf2b0" stroke-width="6" transform="rotate(-20)"/>
+  <g fill="#4cf2b0">
+    <circle cx="290" cy="-200" r="14"/><circle cx="290" cy="-200" r="32" fill="none" stroke="#4cf2b0" stroke-width="3" opacity=".6"/>
+    <circle cx="170" cy="-60" r="10" opacity=".7"/>
+    <circle cx="-200" cy="160" r="9" opacity=".35"/>
+  </g>
+  <circle r="10" fill="#d9f3ea"/>
+</svg>
+<div class="title">
+  <div class="sub">SONAR</div>
+  <h1>EASY <span class="glow">MODE</span></h1>
+  <div class="tagline">A more forgiving solo patrol. Every knob configurable.</div>
+  <div class="tags"><span class="tag">Solo only</span><span class="tag">BepInEx 6</span><span class="tag">No file edits</span></div>
+</div>
+</body></html>
