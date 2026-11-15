@@ -31,6 +31,9 @@
     <Reference Include="$(BepInExDir)\interop\Il2Cppmscorlib.dll" Private="false" />
     <Reference Include="$(BepInExDir)\interop\UnityEngine.CoreModule.dll" Private="false" />
     <Reference Include="$(BepInExDir)\interop\UnityEngine.dll" Private="false" />
+    <Reference Include="$(BepInExDir)\interop\UnityEngine.AudioModule.dll" Private="false" />
+    <Reference Include="$(BepInExDir)\interop\Unity.TextMeshPro.dll" Private="false" />
+    <Reference Include="$(BepInExDir)\interop\UnityEngine.UI.dll" Private="false" />
     <Reference Include="$(BepInExDir)\interop\Assembly-CSharp.dll" Private="false" />
   </ItemGroup>
 

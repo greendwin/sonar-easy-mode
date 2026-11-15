@@ -22,6 +22,8 @@ Config file: `<GameDir>\BepInEx\config\sonar.easymode.cfg`. It is created on fir
 |---|---|---|
 | `FanLink` | `ToggleFloor` | What toggling a fan does to the others. `Off`: vanilla. `ToggleAll`: every fan follows, so one switch gives silent running. `ToggleFloor`: only fans on the same floor follow, so silent running needs one switch on each floor |
 | `TubeAutoLoad` | `true` | Loading a tube by hand also moves one torpedo of the same type from the rack into the next free tube. Both stay in the same torpedo room: skipped if that room's rack has none of that type or its tubes are all full. No torpedo is created or lost |
+| `PanelRemote` | `true` | On the diagnostics panel, pressing the tab that is already open runs an action; the tab title shows the result. **STEALTH**: silent alarm on/off. The alarm still turns its lights red, but its sound drops to `SilentAlarmVolume` and it adds no noise (vanilla adds 0.1 noise while any panel alarm is on, e.g. from overheating with fans off). **ENGINES**: both engines cycle 100% → 50% → 120% (title `ENGINES - 120%`). **TEMPERATURE**: all fans off if any is on, otherwise all on. Host only |
+| `SilentAlarmVolume` | `0.15` | Alarm sound volume while the silent alarm is on, as a fraction of normal. `0` mutes it |
 
 **[Tweaks]**: multipliers, where `1` = vanilla. `MaxFaultsPerType` and `FailuresToExplode` are absolute, where `-1` = vanilla. `EnemyFirstShotDelay` and `EnemyDetectionTime` are in seconds (vanilla 0 and 4).
 

@@ -38,6 +38,8 @@ public static class Settings
     public static ConfigEntry<bool> VerboseLog;
     public static ConfigEntry<FanLinkMode> FanLink;
     public static ConfigEntry<bool> TubeAutoLoad;
+    public static ConfigEntry<bool> PanelRemote;
+    public static ConfigEntry<float> SilentAlarmVolume;
 
     // Defaults are the tuned solo values; 1 (or -1 for absolute knobs) = vanilla. "Duration" knobs: higher = lasts longer. "Chance/speed" knobs: as named.
     public static readonly Knob HungerDuration = new("HungerDuration", 1f, 3f);
@@ -89,6 +91,13 @@ public static class Settings
         TubeAutoLoad = cfg.Bind("Features", "TubeAutoLoad", true,
             "Loading a tube by hand also moves one torpedo of the same type from the rack into the next free tube in the same torpedo room. " +
             "Skipped when that room's rack has none of that type or its tubes are full; no torpedo is created or lost. Works while easy mode is active.");
+        PanelRemote = cfg.Bind("Features", "PanelRemote", true,
+            "Pressing the tab that is already open on the diagnostics panel runs an action, shown in the tab title. " +
+            "STEALTH: silent alarm on/off (the alarm keeps its red lights but makes no sound and no noise). " +
+            "ENGINES: both engines cycle 100% -> 50% -> 120%. TEMPERATURE: all fans off if any is on, otherwise all on. " +
+            "Works while easy mode is active, host only.");
+        SilentAlarmVolume = cfg.Bind("Features", "SilentAlarmVolume", 0.15f,
+            "Alarm sound volume while the silent alarm is on, as a fraction of normal (0 = mute, 1 = unchanged). The alarm adds no noise either way.");
 
         BindKnob(cfg, HungerDuration, "Hunger bar lasts N times longer (hungerDurationSeconds).");
         BindKnob(cfg, StaminaDuration, "Stamina bar lasts N times longer (staminaDurationSeconds).");
