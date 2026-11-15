@@ -40,6 +40,7 @@ public static class Settings
     public static ConfigEntry<bool> TubeAutoLoad;
     public static ConfigEntry<bool> PanelRemote;
     public static ConfigEntry<float> SilentAlarmVolume;
+    public static ConfigEntry<float> AutoTagInterval;
 
     // Defaults are the tuned solo values; 1 (or -1 for absolute knobs) = vanilla. "Duration" knobs: higher = lasts longer. "Chance/speed" knobs: as named.
     public static readonly Knob HungerDuration = new("HungerDuration", 1f, 3f);
@@ -98,6 +99,9 @@ public static class Settings
             "Works while easy mode is active, host only.");
         SilentAlarmVolume = cfg.Bind("Features", "SilentAlarmVolume", 0.15f,
             "Alarm sound volume while the silent alarm is on, as a fraction of normal (0 = mute, 1 = unchanged). The alarm adds no noise either way.");
+        AutoTagInterval = cfg.Bind("Features", "AutoTagInterval", 4f,
+            "While the sonar is on, tag the closest untagged ship inside the sonar radius with its correct type, one ship every N seconds " +
+            "(0 = off). Tags you set by hand are kept. Works while easy mode is active.");
 
         BindKnob(cfg, HungerDuration, "Hunger bar lasts N times longer (hungerDurationSeconds).");
         BindKnob(cfg, StaminaDuration, "Stamina bar lasts N times longer (staminaDurationSeconds).");

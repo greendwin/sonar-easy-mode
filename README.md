@@ -24,6 +24,7 @@ Config file: `<GameDir>\BepInEx\config\sonar.easymode.cfg`. It is created on fir
 | `TubeAutoLoad` | `true` | Loading a tube by hand also moves one torpedo of the same type from the rack into the next free tube. Both stay in the same torpedo room: skipped if that room's rack has none of that type or its tubes are all full. No torpedo is created or lost |
 | `PanelRemote` | `true` | On the diagnostics panel, pressing the tab that is already open runs an action; the tab title shows the result. **STEALTH**: silent alarm on/off. The alarm still turns its lights red, but its sound drops to `SilentAlarmVolume` and it adds no noise (vanilla adds 0.1 noise while any panel alarm is on, e.g. from overheating with fans off). **ENGINES**: both engines cycle 100% → 50% → 120% (title `ENGINES - 120%`). **TEMPERATURE**: all fans off if any is on, otherwise all on. Host only |
 | `SilentAlarmVolume` | `0.15` | Alarm sound volume while the silent alarm is on, as a fraction of normal. `0` mutes it |
+| `AutoTagInterval` | `4` | While the sonar is on, the closest untagged ship inside the sonar radius gets tagged with its correct type, one ship every N seconds. `0` = off. Tags you set by hand are kept. Auto tags are always correct, so they count toward the tagging score |
 
 **[Tweaks]**: multipliers, where `1` = vanilla. `MaxFaultsPerType` and `FailuresToExplode` are absolute, where `-1` = vanilla. `EnemyFirstShotDelay` and `EnemyDetectionTime` are in seconds (vanilla 0 and 4).
 
@@ -126,6 +127,7 @@ Add `-p:Deploy=false` to skip copying the DLL into the game.
 - **`Tweaks.cs`**: maps knobs to fields of the game's config ScriptableObjects (`LevelingConfig`, `GameConfig`, `MissionsConfig`, `OpenWorldLevelingConfig`).
   - Original values are saved on first sight and restored when the mod is inactive.
 - **`ShipSpeeds.cs`**: once per driver tick, scales `Ship.speedMultiplier` of civilian and enemy ships (`AllyShipSpeed` / `EnemyShipSpeed`), the same multiplier the game's debug menu sets. A value the game sets later becomes the new baseline.
+- **`AutoTag.cs`**: from the driver tick, while `SubmarineOutside.IsSonarOn()`, tags the closest ship with no tag inside `Engine.GetSonarDisplayRange()` (horizontal distance) through `SubmarineOutside.AddTag(id, DebugMenu.GetCorrectTagType(type))`, as the debug menu's `TagAllActiveShips` does. No sound, no `Stats.CheckAddTagToShip`.
 - **`TubeAutoLoad.cs`**: postfixes on `TorpedoTubes.LoadItem` / `LoadItemByIndex`. Takes a same-type torpedo off a rack `SingleSpot` in the same room (`SceneCulling.GetZoneType`; tubes are grouped by number, #1-4 = `TorpedoRoom1`, #5-8 = `TorpedoRoom2`, because the culling zone at a tube is unreliable), loads it into the next free tube of that room through `TorpedoTubes.LoadItem`, and puts it back on the rack if the tube did not take it.
 - **`Patches.cs`**: Harmony patches for things that are not plain config values:
   - `Engine.GetNoiseRadius` (NoiseRadius)

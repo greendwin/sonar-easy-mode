@@ -74,6 +74,7 @@ public class EasyModeDriver : MonoBehaviour
         Active = active;
         ShipSpeeds.Apply(active);
         TubeAutoLoad.Confirm();
+        AutoTag.Tick(active);
 
         bool assetChanged = leveling.Pointer != _lastLevelingPtr;
         if (!assetChanged && active == _lastActive && Settings.Version == _lastVersion) return;
