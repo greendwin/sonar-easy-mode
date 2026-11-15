@@ -44,15 +44,11 @@ internal static class PanelRemote
         }
     }
 
-    // Vanilla lever order is 50 / 100 / 120; the remote goes 100 -> 50 -> 120 -> 100.
+    // Toggles 50% / 100% only: both at 50% -> both 100%, anything else (mixed, 100%, 120%) -> both 50%.
     private static void CycleEngines(SubmarineInside sub)
     {
-        var next = sub.Engine1Power switch
-        {
-            EnginePower.Normal => EnginePower.SilentRunning,
-            EnginePower.SilentRunning => EnginePower.ForcingEngines,
-            _ => EnginePower.Normal,
-        };
+        bool silent = sub.Engine1Power == EnginePower.SilentRunning && sub.Engine2Power == EnginePower.SilentRunning;
+        var next = silent ? EnginePower.Normal : EnginePower.SilentRunning;
         // StationEngine.SetEnginePower only writes these fields; the levers are moved to match below.
         sub.Engine1Power = next;
         sub.Engine2Power = next;
