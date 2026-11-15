@@ -124,7 +124,7 @@ Add `-p:Deploy=false` to skip copying the DLL into the game.
 - **`Tweaks.cs`**: maps knobs to fields of the game's config ScriptableObjects (`LevelingConfig`, `GameConfig`, `MissionsConfig`, `OpenWorldLevelingConfig`).
   - Original values are saved on first sight and restored when the mod is inactive.
 - **`ShipSpeeds.cs`**: once per driver tick, scales `Ship.speedMultiplier` of civilian and enemy ships (`AllyShipSpeed` / `EnemyShipSpeed`), the same multiplier the game's debug menu sets. A value the game sets later becomes the new baseline.
-- **`TubeAutoLoad.cs`**: postfixes on `TorpedoTubes.LoadItem` / `LoadItemByIndex`. Takes a same-type torpedo off a rack `SingleSpot` in the same room (`SceneCulling.GetZoneType`), loads it into the next free tube of that room through `TorpedoTubes.LoadItem`, and puts it back on the rack if the tube did not take it.
+- **`TubeAutoLoad.cs`**: postfixes on `TorpedoTubes.LoadItem` / `LoadItemByIndex`. Takes a same-type torpedo off a rack `SingleSpot` in the same room (`SceneCulling.GetZoneType`; tubes are grouped by number, #1-4 = `TorpedoRoom1`, #5-8 = `TorpedoRoom2`, because the culling zone at a tube is unreliable), loads it into the next free tube of that room through `TorpedoTubes.LoadItem`, and puts it back on the rack if the tube did not take it.
 - **`Patches.cs`**: Harmony patches for things that are not plain config values:
   - `Engine.GetNoiseRadius` (NoiseRadius)
   - `Ship.DamageShip` (DamageToEnemies)
