@@ -63,6 +63,10 @@ public static class Settings
     public static readonly Knob DamageToEnemies = new("DamageToEnemies", 1f, 1f);
     public static readonly Knob EnemyTorpedoSpeed = new("EnemyTorpedoSpeed", 1f, 1f);
     public static readonly Knob EnemyTorpedoTurnRate = new("EnemyTorpedoTurnRate", 1f, 0.7f);
+    public static readonly Knob EnemyShotInterval = new("EnemyShotInterval", 1f, 2f);
+    public static readonly Knob EnemyAimCone = new("EnemyAimCone", 1f, 0.33f);
+    public static readonly Knob EnemyFirstShotDelay = new("EnemyFirstShotDelay", 0f, 5f);
+    public static readonly Knob EnemyDetectionTime = new("EnemyDetectionTime", 4f, 5f);
     public static readonly Knob AllyShipSpeed = new("AllyShipSpeed", 1f, 0.8f);
     public static readonly Knob EnemyShipSpeed = new("EnemyShipSpeed", 1f, 0.8f);
     public static readonly Knob MineSlowdownRange = new("MineSlowdownRange", 1f, 1f);
@@ -83,8 +87,8 @@ public static class Settings
             "What toggling a fan does to the other fans. Off = vanilla. ToggleAll = every fan follows (one switch for silent running). " +
             "ToggleFloor = only fans on the same floor follow, so silent running needs one switch per floor. Works while easy mode is active.");
         TubeAutoLoad = cfg.Bind("Features", "TubeAutoLoad", true,
-            "Loading a tube by hand also moves one torpedo of the same type from the rack into the next free tube. " +
-            "Skipped when the rack has none of that type or all tubes are full; no torpedo is created or lost. Works while easy mode is active.");
+            "Loading a tube by hand also moves one torpedo of the same type from the rack into the next free tube in the same torpedo room. " +
+            "Skipped when that room's rack has none of that type or its tubes are full; no torpedo is created or lost. Works while easy mode is active.");
 
         BindKnob(cfg, HungerDuration, "Hunger bar lasts N times longer (hungerDurationSeconds).");
         BindKnob(cfg, StaminaDuration, "Stamina bar lasts N times longer (staminaDurationSeconds).");
@@ -109,6 +113,10 @@ public static class Settings
         BindKnob(cfg, DamageToEnemies, "Damage enemy vessels take from any source (multiplier). Torpedo 1 does 0.66 against enemy sub / frigate life 1.0, destroyer 1.2, carrier 2.0: vanilla 2/2/2/4 hits, x1.6 = 1/1/2/2, x2 = 1/1/1/2.");
         BindKnob(cfg, EnemyTorpedoSpeed, "Speed of torpedoes launched by enemies (multiplier). Your torpedoes are not affected.");
         BindKnob(cfg, EnemyTorpedoTurnRate, "Turn rate of torpedoes launched by enemies (multiplier); lower = easier to evade. Your torpedoes are not affected.");
+        BindKnob(cfg, EnemyShotInterval, "Time between an enemy ship's torpedo shots (multiplier on MissionsConfig.shipTimeBetweenTorpedoShotsMin/Max = 5 / 10 s). Higher = fires less often.");
+        BindKnob(cfg, EnemyAimCone, "Half-angle of the cone in front of an enemy ship inside which it can fire (multiplier on MissionsConfig.attackFireConeHalfAngle = 45 deg). Lower = the ship must turn toward you before firing.");
+        BindKnob(cfg, EnemyFirstShotDelay, "Seconds an enemy ship waits before its first torpedo after detecting you (absolute; vanilla fires at once). Applies again each time it re-detects you.");
+        BindKnob(cfg, EnemyDetectionTime, "Seconds you must stay within an enemy ship's hearing range before it detects you (absolute). Also delays its alarm and the mission's 'detected' flag.");
         BindKnob(cfg, AllyShipSpeed, "Speed of civilian / allied ships, e.g. the ship you escort (multiplier on Ship.speedMultiplier, on top of the mission's own value).");
         BindKnob(cfg, EnemyShipSpeed, "Speed of enemy vessels (multiplier on Ship.speedMultiplier).");
         BindKnob(cfg, MineSlowdownRange, "Range at which a civilian ship slows down because of mines ahead (MissionsConfig.civilShipRangeToReduceSpeedBecauseOfMines = 200). 0 = never slows down. Careful: the slowdown is what gives you time to clear mines in escort missions like Mined Waters, so without it the ship may sail into them (multiplier).");

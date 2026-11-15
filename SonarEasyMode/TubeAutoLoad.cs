@@ -8,7 +8,8 @@ namespace SonarEasyMode;
 /// Loading a tube by hand also moves one torpedo of the same type from the rack into the next free tube.
 /// Nothing is created: the extra torpedo is an existing rack item. The game fills the tube a moment after
 /// the load call, so the item comes off the rack at once and goes back only if the tube is still not loaded
-/// after <see cref="ConfirmSeconds"/>. No rack torpedo of that type or no free tube = nothing happens.
+/// after <see cref="ConfirmSeconds"/>. Tube and rack must both be in the hand-loaded tube's room (zone from the
+/// game's scene culling). No rack torpedo of that type there or no free tube there = nothing happens.
 /// </summary>
 internal static class TubeAutoLoad
 {
@@ -48,19 +49,20 @@ internal static class TubeAutoLoad
 
     private static void LoadNext(TorpedoTubes tubes, int loadedIndex, ItemsType type)
     {
-        int tube = FindFreeTube(tubes, loadedIndex);
-        if (tube < 0)
+        // Everything stays in the hand-loaded tube's room: its tubes and its rack only.
+        var culling = Object.FindFirstObjectByType<SceneCulling>();
+        var room = TubeRoom(tubes, culling, loadedIndex);
+        if (room == ZoneType.None)
         {
-            Patches.ReportOnce("autoload:notube", "TubeAutoLoad: no free tube, skipped");
+            Patches.ReportOnce("autoload:noroom", $"TubeAutoLoad: room of tube {loadedIndex} unknown, skipped");
             return;
         }
 
-        var spot = FindRackSpot(tubes, type);
-        if (spot == null)
-        {
-            Patches.ReportOnce("autoload:norack:" + type, $"TubeAutoLoad: no {type} on the rack, skipped");
-            return;
-        }
+        int tube = FindFreeTube(tubes, loadedIndex, culling, room);
+        if (tube < 0) return;
+
+        var spot = FindRackSpot(tubes, type, culling, room);
+        if (spot == null) return;
 
         var item = spot.item;
         int itemId = item.GetItemLocalID();
@@ -83,7 +85,7 @@ internal static class TubeAutoLoad
             Deadline = Time.unscaledTime + ConfirmSeconds,
         });
         Patches.ReportOnce("autoload:sent", $"TubeAutoLoad: {type} #{itemId} taken off the rack for tube {tube} " +
-                                           $"(hand-loaded tube {loadedIndex})");
+                                           $"(hand-loaded tube {loadedIndex}, {room})");
         Confirm();
     }
 
@@ -127,35 +129,73 @@ internal static class TubeAutoLoad
         return false;
     }
 
-    /// <summary>First empty, unlocked, idle tube after the one just loaded (wrapping around).</summary>
-    private static int FindFreeTube(TorpedoTubes tubes, int loadedIndex)
+    /// <summary>Tube indices in tube order (#1..#8), straight from the game's load-context mapping.</summary>
+    private static List<int> TubeIndices()
     {
-        // Tube indices may be 0- or 1-based; the game's own mapping of the first load context tells which.
-        int first = TorpedoTubes.UseContextToTubeIndex(UseContextType.LoadTorpedo1);
-        int count = TorpedoTubes.TubeCount;
-        for (int step = 1; step < count; step++)
+        // TubeCount and the index base are not trusted: wrapping by TubeCount from a guessed base skipped tube #8.
+        var list = new List<int>();
+        for (var c = UseContextType.LoadTorpedo1; c <= UseContextType.LoadTorpedo8; c++)
+            list.Add(TorpedoTubes.UseContextToTubeIndex(c));
+        return list;
+    }
+
+    private static ZoneType ZoneAt(SceneCulling culling, Component c) =>
+        culling == null || c == null ? ZoneType.None : culling.GetZoneType(c.transform.position);
+
+    private static ZoneType TubeRoom(TorpedoTubes tubes, SceneCulling culling, int index)
+    {
+        var t = tubes.GetTube(index);
+        if (t == null) return ZoneType.None;
+        // The hatch the player uses is inside the room; the tube body may reach past its walls.
+        var zone = ZoneAt(culling, t.interactiveElement);
+        return zone != ZoneType.None ? zone : ZoneAt(culling, t);
+    }
+
+    /// <summary>First empty, unlocked, idle tube of the room after the one just loaded (wrapping around).</summary>
+    private static int FindFreeTube(TorpedoTubes tubes, int loadedIndex, SceneCulling culling, ZoneType room)
+    {
+        var order = TubeIndices();
+        int start = order.IndexOf(loadedIndex);
+        if (start < 0)
+            Patches.ReportOnce("autoload:index", $"TubeAutoLoad: tube {loadedIndex} not in the tube list " +
+                                                 $"[{string.Join(", ", order)}], searching from tube #1");
+        var skipped = new List<string>();
+        for (int step = 1; step <= order.Count; step++)
         {
-            int i = first + ((loadedIndex - first + step) % count + count) % count;
-            if (!TorpedoTubes.IsTubeAvailable(i) || tubes.IsLoaded(i) || IsPending(i)) continue;
-            var t = tubes.GetTube(i);
-            if (t == null || t.IsTubeAnimationPlaying()) continue;
-            return i;
+            int n = (start + step) % order.Count;
+            int i = order[n];
+            if (i == loadedIndex) continue;
+            string why = null;
+            if (!TorpedoTubes.IsTubeAvailable(i)) why = "locked";
+            else if (tubes.IsLoaded(i) || IsPending(i)) why = "loaded";
+            else if (TubeRoom(tubes, culling, i) != room) why = "other room";
+            else if (tubes.GetTube(i) is not { } t) why = "missing";
+            else if (t.IsTubeAnimationPlaying()) why = "door moving";
+            if (why == null) return i;
+            if (why != "loaded" && why != "other room") skipped.Add($"#{n + 1} {why}");
         }
+        Patches.ReportOnce("autoload:notube:" + string.Join(",", skipped),
+            $"TubeAutoLoad: no free tube in {room}, skipped" + (skipped.Count > 0 ? $" ({string.Join(", ", skipped)})" : ""));
         return -1;
     }
 
-    /// <summary>A rack spot of the same submarine holding a torpedo of the given type.</summary>
-    private static SingleSpot FindRackSpot(TorpedoTubes tubes, ItemsType type)
+    /// <summary>A rack spot of the same submarine and room holding a torpedo of the given type.</summary>
+    private static SingleSpot FindRackSpot(TorpedoTubes tubes, ItemsType type, SceneCulling culling, ZoneType room)
     {
         var net = tubes.gameNetCode;
+        var elsewhere = new HashSet<ZoneType>();
         foreach (var spot in Object.FindObjectsByType<SingleSpot>(FindObjectsSortMode.None))
         {
             if (spot == null || !spot.IsFilled()) continue;
             var item = spot.item;
             if (item == null || item.GetItemType() != type) continue;
             if (net != null && spot.gameNetCode != null && spot.gameNetCode.Pointer != net.Pointer) continue;
-            return spot;
+            var zone = ZoneAt(culling, spot);
+            if (zone == room) return spot;
+            elsewhere.Add(zone);
         }
+        Patches.ReportOnce("autoload:norack:" + type + ":" + room, $"TubeAutoLoad: no {type} on the {room} rack, skipped" +
+                                                                 (elsewhere.Count > 0 ? $" (others in: {string.Join(", ", elsewhere)})" : ""));
         return null;
     }
 }

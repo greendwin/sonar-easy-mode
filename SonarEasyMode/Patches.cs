@@ -15,7 +15,7 @@ public static class Patches
     {
         var harmony = new Harmony(harmonyId);
         // Patch class by class so one missing method (game update) does not disable the rest.
-        foreach (var type in new[] { typeof(NoiseRadiusPatch), typeof(DamageShipPatch), typeof(EnemyTorpedoPatch),
+        foreach (var type in new[] { typeof(NoiseRadiusPatch), typeof(DamageShipPatch), typeof(EnemyTorpedoPatch), typeof(EnemyFirePatch),
                      typeof(FanTogglePatch), typeof(FansTogglePatch), typeof(TubeLoadPatch), typeof(TubeLoadByIndexPatch),
                      typeof(LeaderboardUiUploadPatch), typeof(LeaderboardUploadTimePatch), typeof(LeaderboardUploadPvpPatch) })
         {
@@ -134,6 +134,48 @@ internal static class EnemyTorpedoPatch
         foreach (var e in Clones.Values)
             if (e.Clone != null && e.Clone.Pointer == cfg.Pointer) return true;
         return false;
+    }
+}
+
+/// <summary>
+/// Ship.DetectAndAttackTarget (native, per host step): playerDetectionTimer += dt while the player is within
+/// hearing range (reset to 0 otherwise); at a hardcoded 4 s it sets SHIP_PLAYER_DETECTED, and only then can the
+/// player be targeted. timeToNextShot counts down and is 0 at spawn, so the first shot comes on that same step.
+/// The prefix rescales the timer's growth and, on the step detection is about to happen, primes timeToNextShot.
+/// </summary>
+[HarmonyPatch(typeof(Ship), nameof(Ship.DetectAndAttackTarget))]
+internal static class EnemyFirePatch
+{
+    private const float VanillaDetectionTime = 4f;
+
+    private static void Prefix(Ship __instance, float deltaTime)
+    {
+        if (!EasyModeDriver.Active) return;
+        float detectionTime = Settings.Value(Settings.EnemyDetectionTime);
+        float firstShotDelay = Settings.Value(Settings.EnemyFirstShotDelay);
+        bool scaleDetection = detectionTime > 0f && detectionTime != VanillaDetectionTime;
+        if (!scaleDetection && firstShotDelay <= 0f) return;
+        Patches.Guard("EnemyFirePatch", () => Adjust(__instance, deltaTime, scaleDetection ? detectionTime : VanillaDetectionTime, firstShotDelay));
+    }
+
+    private static void Adjust(Ship ship, float dt, float detectionTime, float firstShotDelay)
+    {
+        if (ship.GetShipPlayerDetected()) return;
+
+        // The game adds dt next; pre-subtracting makes the net growth dt * 4 / detectionTime. A lost contact resets it to 0 anyway.
+        float timer = ship.playerDetectionTimer;
+        if (detectionTime != VanillaDetectionTime)
+        {
+            timer -= dt * (1f - VanillaDetectionTime / detectionTime);
+            ship.playerDetectionTimer = timer;
+        }
+
+        if (firstShotDelay > 0f && timer + dt >= VanillaDetectionTime && ship.timeToNextShot < firstShotDelay)
+        {
+            ship.timeToNextShot = firstShotDelay;
+            Patches.ReportOnce("enemyfire", $"EnemyFire: {ship.GetEntityType()} detected you, first shot in {firstShotDelay:0.#} s " +
+                                            $"(detection time {detectionTime:0.#} s)");
+        }
     }
 }
 

@@ -21,9 +21,9 @@ Config file: `<GameDir>\BepInEx\config\sonar.easymode.cfg`. It is created on fir
 | Setting | Default | Meaning |
 |---|---|---|
 | `FanLink` | `ToggleFloor` | What toggling a fan does to the others. `Off`: vanilla. `ToggleAll`: every fan follows, so one switch gives silent running. `ToggleFloor`: only fans on the same floor follow, so silent running needs one switch on each floor |
-| `TubeAutoLoad` | `true` | Loading a tube by hand also moves one torpedo of the same type from the rack into the next free tube. Skipped if the rack has none of that type or every tube is full. No torpedo is created or lost |
+| `TubeAutoLoad` | `true` | Loading a tube by hand also moves one torpedo of the same type from the rack into the next free tube. Both stay in the same torpedo room: skipped if that room's rack has none of that type or its tubes are all full. No torpedo is created or lost |
 
-**[Tweaks]**: multipliers, where `1` = vanilla. For the two absolute values, `-1` = vanilla.
+**[Tweaks]**: multipliers, where `1` = vanilla. `MaxFaultsPerType` and `FailuresToExplode` are absolute, where `-1` = vanilla. `EnemyFirstShotDelay` and `EnemyDetectionTime` are in seconds (vanilla 0 and 4).
 
 | Knob | Effect | Default |
 |---|---|---|
@@ -54,6 +54,10 @@ Config file: `<GameDir>\BepInEx\config\sonar.easymode.cfg`. It is created on fir
 | `DamageToEnemies` | Damage enemy vessels take (see below) | 1 |
 | `EnemyTorpedoSpeed` | Speed of enemy torpedoes; yours are unaffected | 1 |
 | `EnemyTorpedoTurnRate` | Turn rate of enemy torpedoes; lower is easier to evade | 0.7 |
+| `EnemyShotInterval` | Time between an enemy ship's torpedo shots (vanilla 5–10 s); higher fires less often. Each shot is one torpedo | 2 |
+| `EnemyAimCone` | Width of the cone in front of an enemy ship inside which it can fire (vanilla ±45°); lower means it must turn toward you first | 0.33 |
+| `EnemyFirstShotDelay` | Seconds an enemy waits before its first torpedo after detecting you (vanilla 0, fires at once). Applies again after each re-detection | 5 |
+| `EnemyDetectionTime` | Seconds you must stay in an enemy's hearing range before it detects you (vanilla 4). Also delays its alarm and the mission's "detected" flag | 5 |
 | `AllyShipSpeed` | Speed of civilian / allied ships, e.g. the ship you escort | 0.8 |
 | `EnemyShipSpeed` | Speed of enemy vessels | 0.8 |
 | `MineSlowdownRange` | Range at which an escorted ship slows down for mines ahead (vanilla 200). 0 = never slows down, but then it may sail into mines you haven't cleared | 1 |
@@ -120,11 +124,12 @@ Add `-p:Deploy=false` to skip copying the DLL into the game.
 - **`Tweaks.cs`**: maps knobs to fields of the game's config ScriptableObjects (`LevelingConfig`, `GameConfig`, `MissionsConfig`, `OpenWorldLevelingConfig`).
   - Original values are saved on first sight and restored when the mod is inactive.
 - **`ShipSpeeds.cs`**: once per driver tick, scales `Ship.speedMultiplier` of civilian and enemy ships (`AllyShipSpeed` / `EnemyShipSpeed`), the same multiplier the game's debug menu sets. A value the game sets later becomes the new baseline.
-- **`TubeAutoLoad.cs`**: postfixes on `TorpedoTubes.LoadItem` / `LoadItemByIndex`. Takes a same-type torpedo off a rack `SingleSpot`, loads it into the next free tube through `TorpedoTubes.LoadItem`, and puts it back on the rack if the tube did not take it.
+- **`TubeAutoLoad.cs`**: postfixes on `TorpedoTubes.LoadItem` / `LoadItemByIndex`. Takes a same-type torpedo off a rack `SingleSpot` in the same room (`SceneCulling.GetZoneType`), loads it into the next free tube of that room through `TorpedoTubes.LoadItem`, and puts it back on the rack if the tube did not take it.
 - **`Patches.cs`**: Harmony patches for things that are not plain config values:
   - `Engine.GetNoiseRadius` (NoiseRadius)
   - `Ship.DamageShip` (DamageToEnemies)
   - `Torpedo.LaunchWeapon` (enemy torpedoes get a scaled copy of their weapon config)
+  - `Ship.DetectAndAttackTarget` (EnemyDetectionTime / EnemyFirstShotDelay: rescales `playerDetectionTimer`, whose 4 s threshold is hardcoded, and primes `timeToNextShot` on the step detection happens)
   - fan toggles (FanLink)
   - `AppUI.LeaderboardUploadTime`, `AbyLib.Leaderboards.UploadTime` / `UploadPvpScore` (skipped while `Enabled`)
 
