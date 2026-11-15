@@ -142,7 +142,11 @@ internal static class TubeAutoLoad
         _ => ZoneType.None,
     };
 
-    /// <summary>First empty, unlocked, idle tube of the room after the one just loaded, wrapping within the room.</summary>
+    /// <summary>
+    /// Any empty, unlocked, idle tube of the room, checked in order after the one just loaded and wrapping within the
+    /// room (hand-loading #4 tries #1, #2, #3). IsLoaded is false while a tube's door animates, so a tube that is
+    /// still loading counts as busy, not free.
+    /// </summary>
     private static int FindFreeTube(TorpedoTubes tubes, int loadedIndex, ZoneType room)
     {
         int first = (loadedIndex - 1) / TubesPerRoom * TubesPerRoom + 1;
@@ -153,7 +157,8 @@ internal static class TubeAutoLoad
             string why = null;
             if (!TorpedoTubes.IsTubeAvailable(i)) why = "locked";
             else if (tubes.IsLoaded(i) || IsPending(i)) why = "loaded";
-            else if (tubes.GetTube(i) is not { } t) why = "missing";
+            // GetTube is 0-based, unlike IsLoaded / IsTubeAvailable / LoadItem (1-based).
+            else if (tubes.GetTube(i - 1) is not { } t) why = "missing";
             else if (t.IsTubeAnimationPlaying()) why = "door moving";
             if (why == null) return i;
             if (why != "loaded") skipped.Add($"#{i} {why}");
