@@ -9,7 +9,7 @@ namespace SonarEasyMode;
 
 /// <summary>
 /// Diagnostics panel remote: pressing the tab that is already open runs an action (silent alarm, engine power,
-/// all fans), and the tab title shows the resulting state, e.g. "ENGINES - 120%".
+/// all fans), and the tab title shows the resulting state, e.g. "ENGINES - 50%".
 /// </summary>
 internal static class PanelRemote
 {

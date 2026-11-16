@@ -94,8 +94,8 @@ public static class Settings
             "Skipped when that room's rack has none of that type or its tubes are full; no torpedo is created or lost. Works while easy mode is active.");
         PanelRemote = cfg.Bind("Features", "PanelRemote", true,
             "Pressing the tab that is already open on the diagnostics panel runs an action, shown in the tab title. " +
-            "STEALTH: silent alarm on/off (the alarm keeps its red lights but makes no sound and no noise). " +
-            "ENGINES: both engines cycle 100% -> 50% -> 120%. TEMPERATURE: all fans off if any is on, otherwise all on. " +
+            "STEALTH: silent alarm on/off (the alarm keeps its red lights, but its sound drops to SilentAlarmVolume and it adds no noise). " +
+            "ENGINES: both engines to 50%, or back to 100% if both are already at 50%. TEMPERATURE: all fans off if any is on, otherwise all on. " +
             "Works while easy mode is active, host only.");
         SilentAlarmVolume = cfg.Bind("Features", "SilentAlarmVolume", 0.15f,
             "Alarm sound volume while the silent alarm is on, as a fraction of normal (0 = mute, 1 = unchanged). The alarm adds no noise either way.");
