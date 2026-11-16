@@ -49,7 +49,7 @@ deploy: compile
 	@$(PS) "New-Item -ItemType Directory -Force -Path '$(PLUGIN_DIR)' | Out-Null; Copy-Item -Force '$(DLL)' '$(PLUGIN_DIR)'; Write-Host 'Deployed to $(PLUGIN_DIR)'"
 
 build: compile
-	@$(PS) "Remove-Item -Recurse -Force '$(STAGE_DIR)' -ErrorAction SilentlyContinue; New-Item -ItemType Directory -Force -Path '$(STAGE_DIR)/BepInEx/plugins/SonarEasyMode' | Out-Null; Copy-Item '$(DLL)' '$(STAGE_DIR)/BepInEx/plugins/SonarEasyMode'; Copy-Item 'README.md' '$(STAGE_DIR)/BepInEx/plugins/SonarEasyMode'; Compress-Archive -Force -Path '$(STAGE_DIR)/*' -DestinationPath '$(ZIP)'; Remove-Item -Recurse -Force '$(STAGE_DIR)'; Write-Host 'Created $(ZIP)'"
+	@$(PS) "Remove-Item -Recurse -Force '$(STAGE_DIR)' -ErrorAction SilentlyContinue; New-Item -ItemType Directory -Force -Path '$(STAGE_DIR)/BepInEx/plugins/SonarEasyMode' | Out-Null; Copy-Item '$(DLL)' '$(STAGE_DIR)/BepInEx/plugins/SonarEasyMode'; Copy-Item 'README.md','CHANGELOG.md' '$(STAGE_DIR)/BepInEx/plugins/SonarEasyMode';Compress-Archive -Force -Path '$(STAGE_DIR)/*' -DestinationPath '$(ZIP)'; Remove-Item -Recurse -Force '$(STAGE_DIR)'; Write-Host 'Created $(ZIP)'"
 
 clean:
 	@$(PS) "Remove-Item -Recurse -Force 'SonarEasyMode/bin','SonarEasyMode/obj','$(DIST_DIR)' -ErrorAction SilentlyContinue"
