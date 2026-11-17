@@ -12,7 +12,7 @@ Makes solo runs of SONAR more forgiving. Everything is configurable. It never to
 - Auto tagging: while the sonar is on, ships inside its radius get tagged with their correct type, one every few seconds. Your own tags are kept.
 - Panel remote: on the diagnostics panel, press the tab that is already open to toggle a silent alarm (STEALTH), switch both engines between 50% and 100% (ENGINES) or turn all fans off or on (TEMPERATURE). Host only.
 - Fan linking: toggling one fan also toggles the others on the same floor, or on the whole sub.
-- Tube autoload: loading a tube by hand also moves a torpedo of the same type from the rack into the next free tube in the same torpedo room.
+- Tube autoload: loading a tube by hand with Shift held also moves a torpedo of the same type from the rack into the next free tube in the same torpedo room.
 
 ## Multiplayer friendly
 

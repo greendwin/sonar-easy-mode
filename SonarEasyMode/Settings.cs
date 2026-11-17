@@ -90,7 +90,7 @@ public static class Settings
             "What toggling a fan does to the other fans. Off = vanilla. ToggleAll = every fan follows (one switch for silent running). " +
             "ToggleFloor = only fans on the same floor follow, so silent running needs one switch per floor. Works while easy mode is active.");
         TubeAutoLoad = cfg.Bind("Features", "TubeAutoLoad", true,
-            "Loading a tube by hand also moves one torpedo of the same type from the rack into the next free tube in the same torpedo room. " +
+            "Loading a tube by hand with Shift held also moves one torpedo of the same type from the rack into the next free tube in the same torpedo room. " +
             "Skipped when that room's rack has none of that type or its tubes are full; no torpedo is created or lost. Works while easy mode is active.");
         PanelRemote = cfg.Bind("Features", "PanelRemote", true,
             "Pressing the tab that is already open on the diagnostics panel runs an action, shown in the tab title. " +

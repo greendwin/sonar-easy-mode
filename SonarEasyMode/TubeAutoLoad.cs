@@ -1,12 +1,13 @@
 using System.Collections.Generic;
 using HarmonyLib;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace SonarEasyMode;
 
 /// <summary>
-/// Loading a tube by hand also moves one torpedo of the same type from the rack into the next free tube.
-/// Nothing is created: the extra torpedo is an existing rack item. The game fills the tube a moment after
+/// Loading a tube by hand with Shift held also moves one torpedo of the same type from the rack into the next free
+/// tube; without Shift only the hand-loaded tube is filled. Nothing is created: the extra torpedo is an existing rack item. The game fills the tube a moment after
 /// the load call, so the item comes off the rack at once and goes back only if the tube is still not loaded
 /// after <see cref="ConfirmSeconds"/>. Tube and rack must both be in the hand-loaded tube's room: tubes #1-4 are
 /// torpedo room 1, #5-8 room 2 (the scene-culling zone at a tube is unreliable: it put #5 in room 1 and #8 nowhere,
@@ -38,6 +39,8 @@ internal static class TubeAutoLoad
 
     internal static void AfterLoad(TorpedoTubes tubes, int loadedIndex, ItemsType type)
     {
+        // A plain load fills one tube only (for fine-tuning a single torpedo); Shift asks for the second one.
+        if (Keyboard.current is not { } kb || !kb.shiftKey.isPressed) return;
         Busy = true;
         try
         {
