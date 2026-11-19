@@ -16,7 +16,7 @@ public static class Patches
         var harmony = new Harmony(harmonyId);
         // Patch class by class so one missing method (game update) does not disable the rest.
         foreach (var type in new[] { typeof(NoiseRadiusPatch), typeof(DamageShipPatch), typeof(EnemyTorpedoPatch), typeof(EnemyFirePatch),
-                     typeof(FanTogglePatch), typeof(FansTogglePatch), typeof(TubeLoadPatch), typeof(TubeLoadByIndexPatch), typeof(PumpLinkStepPatch), typeof(PumpLinkClaimPatch),
+                     typeof(FanTogglePatch), typeof(FansTogglePatch), typeof(TubeLoadPatch), typeof(TubeLoadByIndexPatch), typeof(PumpLinkStepPatch), typeof(PumpLinkClaimPatch), typeof(FullFuelPatch),
                      typeof(DiagnosticsTabPressPatch), typeof(SilentAlarmNoisePatch), typeof(SilentAlarmSoundPatch), typeof(DiagnosticsTabTitlePatch),
                      typeof(LeaderboardUiUploadPatch), typeof(LeaderboardUploadTimePatch), typeof(LeaderboardUploadPvpPatch) })
         {
@@ -217,6 +217,20 @@ internal static class FanLink
         {
             Busy = false;
         }
+    }
+}
+
+/// <summary>ResetStates (mission start) hardcodes engine 1 fuel to 0.5 and engine 2 to 1; fill engine 1 too. Fuel is host-synced, so clients follow.</summary>
+[HarmonyPatch(typeof(SubmarineInside), nameof(SubmarineInside.ResetStates))]
+internal static class FullFuelPatch
+{
+    private static void Postfix(SubmarineInside __instance)
+    {
+        if (!EasyModeDriver.Active || !Settings.FullFuelAtStart.Value) return;
+        ushort full = UtilsMath.FloatNormalizedToUFixed(1f);
+        __instance.Engine1Fuel = full;
+        __instance.Engine2Fuel = full;
+        Patches.ReportOnce("fullfuel", "FullFuelAtStart: both engines start with a full tank");
     }
 }
 

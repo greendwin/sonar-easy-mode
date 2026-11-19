@@ -23,6 +23,7 @@ Config file: `<GameDir>\BepInEx\config\sonar.easymode.cfg`. It is created on fir
 | `FanLink` | `ToggleFloor` | What toggling a fan does to the others. `Off`: vanilla. `ToggleAll`: every fan follows, so one switch gives silent running. `ToggleFloor`: only fans on the same floor follow, so silent running needs one switch on each floor |
 | `TubeAutoLoad` | `true` | Loading a tube by hand with Shift held also moves one torpedo of the same type from the rack into the next free tube. Both stay in the same torpedo room: skipped if that room's rack has none of that type or its tubes are all full. No torpedo is created or lost |
 | `PumpLink` | `true` | Holding a bilge pump button also runs the pumps of every other room on the same floor that has water on the floor. Rooms without power are skipped. Each linked pump stops when its room is dry, loses power, or when you let go. Host only |
+| `FullFuelAtStart` | `true` | Both engines start a mission with a full tank. Vanilla starts engine 1 half full. Host only |
 | `PanelRemote` | `true` | On the diagnostics panel, pressing the tab that is already open runs an action; the tab title shows the result. **STEALTH**: silent alarm on/off. The alarm still turns its lights red, but its sound drops to `SilentAlarmVolume` and it adds no noise (vanilla adds 0.1 noise while any panel alarm is on, e.g. from overheating with fans off). **ENGINES**: both engines to 50%, or back to 100% if both are already at 50% (title `ENGINES - 50%`). **TEMPERATURE**: all fans off if any is on, otherwise all on. Host only |
 | `SilentAlarmVolume` | `0.15` | Alarm sound volume while the silent alarm is on, as a fraction of normal. `0` mutes it |
 | `AutoTagInterval` | `4` | While the sonar is on, the closest untagged ship inside the sonar radius gets tagged with its correct type, one ship every N seconds. `0` = off. Tags you set by hand are kept. Auto tags are always correct, so they count toward the tagging score |
@@ -137,6 +138,7 @@ Add `-p:Deploy=false` to skip copying the DLL into the game.
   - `Torpedo.LaunchWeapon` (enemy torpedoes get a scaled copy of their weapon config)
   - `Ship.DetectAndAttackTarget` (EnemyDetectionTime / EnemyFirstShotDelay: rescales `playerDetectionTimer`, whose 4 s threshold is hardcoded, and primes `timeToNextShot` on the step detection happens)
   - fan toggles (FanLink)
+  - `SubmarineInside.ResetStates` (FullFuelAtStart: the game hardcodes `Engine1Fuel` 0.5 and `Engine2Fuel` 1 there)
   - `AppUI.LeaderboardUploadTime`, `AbyLib.Leaderboards.UploadTime` / `UploadPvpScore` (skipped while `Enabled`)
 
   Each patch logs its first hit, so `LogOutput.log` shows which hooks fire in play.
