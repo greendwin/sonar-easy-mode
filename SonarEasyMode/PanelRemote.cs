@@ -140,7 +140,7 @@ internal static class PanelRemote
     private static bool IsHost()
     {
         var mp = Engine.Instance?.multiplayer;
-        return mp == null || mp.IsOfflineSession || mp.IsLocalPlayerHost();
+        return mp == null || mp.IsUsingDummyStack || mp.IsLocalPlayerHost();
     }
 }
 

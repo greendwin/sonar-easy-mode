@@ -194,7 +194,7 @@ internal static class FanLink
         {
             var mode = Settings.FanLink.Value;
             // Floors come from the game's own zone topology (upper / lower floor zone lists).
-            var topology = mode == FanLinkMode.ToggleFloor ? source?.submarine?.subTopology ?? Engine.Instance?.subTopology : null;
+            var topology = mode == FanLinkMode.ToggleFloor ? source?.submarine?.layouts?.Topology ?? Engine.Instance?.layouts?.Topology : null;
             if (mode == FanLinkMode.ToggleFloor && (source == null || topology == null))
             {
                 Patches.ReportOnce("fans:notopology", "FanLink: no submarine topology, ToggleFloor does nothing");

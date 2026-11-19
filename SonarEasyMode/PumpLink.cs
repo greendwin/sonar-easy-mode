@@ -8,8 +8,8 @@ namespace SonarEasyMode;
 /// <summary>
 /// Holding one bilge pump also runs the pumps of every other flooded room on the same floor.
 /// A pump runs while its <c>PumpWater_*_pressed</c> flag is set (written from the pump station's held button). Each host step
-/// clears the flag of any pump whose station nobody claims, then calls RemoveWaterAspiration for the flagged rooms.
-/// The prefix sets the flags of the linked rooms, and while that step runs their stations report as claimed, so the game
+/// clears the flag of any pump whose station nobody occupies (IsStationOccupied), then calls RemoveWaterAspiration for the flagged rooms.
+/// The prefix sets the flags of the linked rooms, and while that step runs their stations report as occupied, so the game
 /// keeps them and pumps, lights, sounds and syncs those rooms itself. Pumping is free (no noise, fuel or power) and water
 /// is clamped at 0, so only flooded rooms are linked to keep dry pumps quiet; a room is released once it is dry.
 /// Rooms without power are skipped (and released when they lose it), as the pump station itself requires power.
@@ -24,7 +24,7 @@ internal static class PumpLink
         ZoneType.EngineRoom, ZoneType.TorpedoPlatform, ZoneType.TorpedoRoom1, ZoneType.TorpedoRoom2,
     };
 
-    /// <summary>Pump stations this mod keeps running; reported as claimed during the host step.</summary>
+    /// <summary>Pump stations this mod keeps running; reported as occupied during the host step.</summary>
     private static readonly HashSet<StationType> Linked = new();
 
     internal static bool InStep;
@@ -42,7 +42,7 @@ internal static class PumpLink
         }
 
         var claims = sub.game?.stationClaimManager;
-        var topology = sub.subTopology ?? Engine.Instance?.subTopology;
+        var topology = sub.layouts?.Topology ?? Engine.Instance?.layouts?.Topology;
         if (topology == null)
         {
             Patches.ReportOnce("pumps:notopology", "PumpLink: no submarine topology, does nothing");
@@ -56,7 +56,7 @@ internal static class PumpLink
         {
             var station = UtilsProgression.GetPumpOutStationTypeForZoneType(zone);
             if (!sub.IsAbsorbing(zone)) continue;
-            bool held = claims != null ? claims.IsStationClaimed(station) : !Linked.Contains(station);
+            bool held = claims != null ? claims.IsStationOccupied(station) : !Linked.Contains(station);
             if (held) sources.Add(zone);
         }
 
@@ -133,8 +133,8 @@ internal static class PumpLinkStepPatch
     private static void Finalizer() => PumpLink.InStep = false;
 }
 
-/// <summary>Linked pump stations count as claimed during the host step, so the game does not clear their flags.</summary>
-[HarmonyPatch(typeof(StationClaimManager), nameof(StationClaimManager.IsStationClaimed))]
+/// <summary>Linked pump stations count as occupied during the host step, so the game does not clear their flags.</summary>
+[HarmonyPatch(typeof(StationClaimManager), nameof(StationClaimManager.IsStationOccupied))]
 internal static class PumpLinkClaimPatch
 {
     private static void Postfix(StationType stationType, ref bool __result)
