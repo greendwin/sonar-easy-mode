@@ -38,6 +38,7 @@ public static class Settings
     public static ConfigEntry<bool> VerboseLog;
     public static ConfigEntry<FanLinkMode> FanLink;
     public static ConfigEntry<bool> TubeAutoLoad;
+    public static ConfigEntry<bool> PumpLink;
     public static ConfigEntry<bool> PanelRemote;
     public static ConfigEntry<float> SilentAlarmVolume;
     public static ConfigEntry<float> AutoTagInterval;
@@ -92,6 +93,9 @@ public static class Settings
         TubeAutoLoad = cfg.Bind("Features", "TubeAutoLoad", true,
             "Loading a tube by hand with Shift held also moves one torpedo of the same type from the rack into the next free tube in the same torpedo room. " +
             "Skipped when that room's rack has none of that type or its tubes are full; no torpedo is created or lost. Works while easy mode is active.");
+        PumpLink = cfg.Bind("Features", "PumpLink", true,
+            "Holding a bilge pump button also runs the pumps of every other room on the same floor that has water on the floor. " +
+            "Rooms without power are skipped. Each linked pump stops when its room is dry, loses power, or when you let go. Works while easy mode is active, host only.");
         PanelRemote = cfg.Bind("Features", "PanelRemote", true,
             "Pressing the tab that is already open on the diagnostics panel runs an action, shown in the tab title. " +
             "STEALTH: silent alarm on/off (the alarm keeps its red lights, but its sound drops to SilentAlarmVolume and it adds no noise). " +
