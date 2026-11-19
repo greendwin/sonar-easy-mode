@@ -138,7 +138,7 @@ Add `-p:Deploy=false` to skip copying the DLL into the game.
   - `Torpedo.LaunchWeapon` (enemy torpedoes get a scaled copy of their weapon config)
   - `Ship.DetectAndAttackTarget` (EnemyDetectionTime / EnemyFirstShotDelay: rescales `playerDetectionTimer`, whose 4 s threshold is hardcoded, and primes `timeToNextShot` on the step detection happens)
   - fan toggles (FanLink)
-  - `SubmarineInside.ResetStates` (FullFuelAtStart: the game hardcodes `Engine1Fuel` 0.5 and `Engine2Fuel` 1 there)
+  - `SubmarineInside.Init` + `SubmarineInside.ResetStates` (FullFuelAtStart: the game hardcodes `Engine1Fuel` 0.5 and `Engine2Fuel` 1 on mission load and on restart; the tutorial is skipped)
   - `AppUI.LeaderboardUploadTime`, `AbyLib.Leaderboards.UploadTime` / `UploadPvpScore` (skipped while `Enabled`)
 
   Each patch logs its first hit, so `LogOutput.log` shows which hooks fire in play.

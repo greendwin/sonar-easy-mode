@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using HarmonyLib;
 using Indy;
 using UnityEngine;
@@ -220,13 +221,22 @@ internal static class FanLink
     }
 }
 
-/// <summary>ResetStates (mission start) hardcodes engine 1 fuel to 0.5 and engine 2 to 1; fill engine 1 too. Fuel is host-synced, so clients follow.</summary>
-[HarmonyPatch(typeof(SubmarineInside), nameof(SubmarineInside.ResetStates))]
+/// <summary>
+/// Init (mission load) and ResetStates (mission restart) hardcode engine 1 fuel to 0.5 and engine 2 to 1; fill engine 1 too.
+/// The tutorial starts with both tanks empty on purpose, so it is left alone. Fuel is host-synced, so clients follow.
+/// </summary>
+[HarmonyPatch]
 internal static class FullFuelPatch
 {
+    private static IEnumerable<MethodBase> TargetMethods()
+    {
+        yield return AccessTools.Method(typeof(SubmarineInside), nameof(SubmarineInside.Init));
+        yield return AccessTools.Method(typeof(SubmarineInside), nameof(SubmarineInside.ResetStates));
+    }
+
     private static void Postfix(SubmarineInside __instance)
     {
-        if (!EasyModeDriver.Active || !Settings.FullFuelAtStart.Value) return;
+        if (!EasyModeDriver.Active || !Settings.FullFuelAtStart.Value || Engine.gameMode == GameMode.Tutorial) return;
         ushort full = UtilsMath.FloatNormalizedToUFixed(1f);
         __instance.Engine1Fuel = full;
         __instance.Engine2Fuel = full;
