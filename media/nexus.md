@@ -12,6 +12,8 @@ Makes solo runs of SONAR more forgiving. Everything is configurable. It never to
 - Auto tagging: while the sonar is on, ships inside its radius get tagged with their correct type, one every few seconds. Your own tags are kept.
 - Panel remote: on the diagnostics panel, press the tab that is already open to toggle a silent alarm (STEALTH), switch both engines between 50% and 100% (ENGINES) or turn all fans off or on (TEMPERATURE). Host only.
 - Fan linking: toggling one fan also toggles the others on the same floor, or on the whole sub.
+- Pump linking: holding a bilge pump button also pumps every other flooded room on the same floor that has power. Host only.
+- Full fuel: both engines start a mission with a full tank. Host only.
 - Tube autoload: loading a tube by hand with Shift held also moves a torpedo of the same type from the rack into the next free tube in the same torpedo room.
 
 ## Multiplayer friendly
@@ -23,6 +25,8 @@ By default it only applies while you're the only player. When someone joins, it 
 While the mod is enabled, nothing is uploaded to the leaderboards. Set Enabled = false to play ranked.
 
 ## Install
+
+Supports SONAR game version 1.1. Older game versions are not supported.
 
 1. Install BepInEx 6 Bleeding Edge, IL2CPP x64, build be.791 or newer, and launch the game once.
 2. Extract the zip into the game folder, next to SONAR.exe.

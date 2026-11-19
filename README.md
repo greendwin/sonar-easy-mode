@@ -81,6 +81,8 @@ Config file: `<GameDir>\BepInEx\config\sonar.easymode.cfg`. It is created on fir
 
 ## Install
 
+Supports SONAR game version 1.1. Older game versions are not supported.
+
 1. **BepInEx 6 Bleeding Edge, IL2CPP, win-x64, build be.791 or newer.** Older builds can't read this game's metadata.
    1. Download it from <https://builds.bepinex.dev/projects/bepinex_be>.
    2. Extract it into the game folder, next to `SONAR.exe`.

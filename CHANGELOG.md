@@ -2,6 +2,22 @@
 
 All notable changes to SONAR Easy Mode are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-11-20
+
+### Added
+
+- **Pump linking** - `PumpLink` (default `true`): holding a bilge pump button also runs the pumps of every other room on the same floor that has water on the floor. Rooms without power are skipped. Each linked pump stops when its room is dry, loses power, or when you let go. Host only.
+- **Full fuel at start** - `FullFuelAtStart` (default `true`): both engines start a mission, and a restart, with a full tank (vanilla starts engine 1 half full). Host only.
+
+### Changed
+
+- Tube autoload now acts only while Shift is held when you load a tube by hand, so loading a single tube no longer pulls a second torpedo from the rack.
+- `FaultRisk` default 0.1 -> 0.2: random leaks, fires and fuse breaks are still rare, but a bit more frequent than before.
+
+### Fixed
+
+- Updated for game version 1.1.
+
 ## [1.1.0] - 2026-11-16
 
 ### Added
@@ -40,5 +56,6 @@ First release. All settings live in `BepInEx\config\sonar.easymode.cfg`; values 
 - **Stealth and combat tweaks**: `NoiseRadius` (1), `DepthNoise` (1), `DamageToEnemies` (1), `EnemyTorpedoSpeed` (1), `EnemyTorpedoTurnRate` (0.7), `AllyShipSpeed` (0.8), `EnemyShipSpeed` (0.8), `MineSlowdownRange` (1).
 - **Open World tweaks** (experimental, probably no effect): `OpenWorldFuelUse`, `OpenWorldFilterUse`, `OpenWorldFoodUse` (1).
 
+[1.2.0]: https://github.com/greendwin/sonar-easy-mode/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/greendwin/sonar-easy-mode/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/greendwin/sonar-easy-mode/releases/tag/v1.0.0
