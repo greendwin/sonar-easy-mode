@@ -45,7 +45,7 @@ Config file: `<GameDir>\BepInEx\config\sonar.easymode.cfg`. It is created on fir
 | `SnorkelDuration` | Snorkel tank lasts N× longer | 1 |
 | `RefuelSpeed` | Refueling speed | 1 |
 | **Faults** | | |
-| `FaultRisk` | Chance of random leaks / fires / fuse breaks | 0.1 |
+| `FaultRisk` | Chance of random leaks / fires / fuse breaks | 0.2 |
 | `HitFaultChance` | Chance that a hit causes a fault or engine stop | 0.5 |
 | `MaxFaultsPerType` | Max fires / leaks / fuse breaks per mission (absolute, vanilla 2) | 2 |
 | `FailuresToExplode` | Failures before the sub is lost (absolute, vanilla 20) | 25 |

@@ -53,7 +53,7 @@ public static class Settings
     public static readonly Knob Co2FilterDuration = new("Co2FilterDuration", 1f, 2f);
     public static readonly Knob SnorkelDuration = new("SnorkelDuration", 1f, 1f);
     public static readonly Knob RefuelSpeed = new("RefuelSpeed", 1f, 1f);
-    public static readonly Knob FaultRisk = new("FaultRisk", 1f, 0.1f);
+    public static readonly Knob FaultRisk = new("FaultRisk", 1f, 0.2f);
     public static readonly Knob HitFaultChance = new("HitFaultChance", 1f, 0.5f);
     public static readonly Knob MaxFaultsPerType = new("MaxFaultsPerType", -1f, 2f);
     public static readonly Knob FailuresToExplode = new("FailuresToExplode", -1f, 25f);
