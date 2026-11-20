@@ -40,6 +40,7 @@ public static class Settings
     public static ConfigEntry<bool> TubeAutoLoad;
     public static ConfigEntry<bool> PumpLink;
     public static ConfigEntry<bool> FullFuelAtStart;
+    public static ConfigEntry<bool> SnorkelAutoFill;
     public static ConfigEntry<bool> PanelRemote;
     public static ConfigEntry<float> SilentAlarmVolume;
     public static ConfigEntry<float> AutoTagInterval;
@@ -100,6 +101,10 @@ public static class Settings
             "Rooms without power are skipped. Each linked pump stops when its room is dry, loses power, or when you let go. Works while easy mode is active, host only.");
         FullFuelAtStart = cfg.Bind("Features", "FullFuelAtStart", true,
             "Both engines start a mission with a full tank (vanilla starts engine 1 half full). Works while easy mode is active, host only.");
+        SnorkelAutoFill = cfg.Bind("Features", "SnorkelAutoFill", true,
+            "While the submarine floats on the surface, the snorkel fills the air tank by itself, as fast as with the lever held. " +
+            "Below the surface, periscope depth included, you still fill it with the lever. Needs power in oxygen filtration, like the lever. " +
+            "Not in the tutorial. Works while easy mode is active, host only.");
         PanelRemote = cfg.Bind("Features", "PanelRemote", true,
             "Pressing the tab that is already open on the diagnostics panel runs an action, shown in the tab title. " +
             "STEALTH: silent alarm on/off (the alarm keeps its red lights, but its sound drops to SilentAlarmVolume and it adds no noise). " +
