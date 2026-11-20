@@ -61,6 +61,11 @@ public class EasyModeDriver : MonoBehaviour
         }
     }
 
+    private void LateUpdate()
+    {
+        Patches.Guard("Pause", Pause.Tick);
+    }
+
     private void Tick()
     {
         var engine = Engine.Instance;

@@ -19,7 +19,8 @@ public static class Patches
         foreach (var type in new[] { typeof(NoiseRadiusPatch), typeof(DamageShipPatch), typeof(EnemyTorpedoPatch), typeof(EnemyFirePatch),
                      typeof(FanTogglePatch), typeof(FansTogglePatch), typeof(TubeLoadPatch), typeof(TubeLoadByIndexPatch), typeof(PumpLinkStepPatch), typeof(PumpLinkClaimPatch), typeof(FullFuelPatch),
                      typeof(DiagnosticsTabPressPatch), typeof(SilentAlarmNoisePatch), typeof(SilentAlarmSoundPatch), typeof(DiagnosticsTabTitlePatch),
-                     typeof(LeaderboardUiUploadPatch), typeof(LeaderboardUploadTimePatch), typeof(LeaderboardUploadPvpPatch) })
+                     typeof(LeaderboardUiUploadPatch), typeof(LeaderboardUploadTimePatch), typeof(LeaderboardUploadPvpPatch),
+                     typeof(PauseMenuOpenPatch), typeof(PausePeerConnectedPatch) })
         {
             try
             {
