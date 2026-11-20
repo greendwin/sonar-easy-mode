@@ -1,5 +1,8 @@
 # SONAR Easy Mode
 
+**Supports game version**: 1.1.1.0
+
+
 Makes solo runs of SONAR more forgiving. Everything is configurable. It never touches game files: values are changed in memory only.
 
 ## What it does (default settings)
@@ -14,7 +17,9 @@ Makes solo runs of SONAR more forgiving. Everything is configurable. It never to
 - Fan linking: toggling one fan also toggles the others on the same floor, or on the whole sub.
 - Pump linking: holding a bilge pump button also pumps every other flooded room on the same floor that has power. Host only.
 - Full fuel: both engines start a mission with a full tank. Host only.
+- Snorkel autofill: while the sub floats on the surface, the air tank fills by itself, as fast as with the snorkel lever held. Host only.
 - Tube autoload: loading a tube by hand with Shift held also moves a torpedo of the same type from the rack into the next free tube in the same torpedo room.
+- Pause in menu: the game stops while the Esc menu is open, offline or when you host alone. It resumes at once if someone joins.
 
 ## Multiplayer friendly
 
@@ -25,8 +30,6 @@ By default it only applies while you're the only player. When someone joins, it 
 While the mod is enabled, nothing is uploaded to the leaderboards. Set Enabled = false to play ranked.
 
 ## Install
-
-Supports SONAR game version 1.1. Older game versions are not supported.
 
 1. Install BepInEx 6 Bleeding Edge, IL2CPP x64, build be.791 or newer, and launch the game once.
 2. Extract the zip into the game folder, next to SONAR.exe.
